@@ -1,4 +1,4 @@
-﻿@attribute [PageInfo(IdModulo = 3)]
+﻿@attribute [PageInfo(IdModulo = 7)]
 
 @page "/ConsultaProductos"
 @using PlantillaBlazor.Domain.Entities.GaiaCaporal
@@ -97,14 +97,33 @@
                                 @producto.Descripcion
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn TItem="Producto" Property="IdCategoria" Title="Categoría" Type="typeof(IEnumerable<long>)"
-                                              FilterValue="@_selectedCategoriaIds" FilterOperator="FilterOperator.Contains" LogicalFilterOperator="LogicalFilterOperator.Or">
+                        <RadzenDataGridColumn TItem="Producto" Property="IdCategoria" Title="Categoría"
+                                              Type="typeof(IEnumerable<long>)"
+                                              FilterValue="@_selectedCategoriaIds"
+                                              FilterOperator="FilterOperator.Contains"
+                                              LogicalFilterOperator="LogicalFilterOperator.Or">
+
                             <FilterTemplate>
-                                <RadzenCustomDropDown @bind-Value=@_selectedCategoriaIds Change=@OnselectedCategoriasIdsChange Data="@(_categorias)" AllowClear="true" ValueProperty="Id" TextProperty="Nombre" Multiple="true" />
+                                <RadzenCustomDropDown @bind-Value="_selectedCategoriaIds"
+                                                      Change="@OnselectedCategoriasIdsChange"
+                                                      Data="@_categorias.ListaParametrosDetallados"
+                                                      AllowClear="true"
+                                                      ValueProperty="Id"
+                                                      TextProperty="Nombre"
+                                                      Multiple="true" />
                             </FilterTemplate>
+
                             <EditTemplate Context="producto">
-                                <RadzenCustomDropDown AllowClear="false" TValue="long" class="form-control" Placeholder="[Seleccionar]" @bind-value="producto.IdCategoria" Data=@_categorias TextProperty="Nombre" ValueProperty="Id" />
+                                <RadzenCustomDropDown AllowClear="false"
+                                                      TValue="long"
+                                                      class="form-control"
+                                                      Placeholder="[Seleccionar]"
+                                                      @bind-Value="producto.IdCategoria"
+                                                      Data="@_categorias.ListaParametrosDetallados"
+                                                      TextProperty="Nombre"
+                                                      ValueProperty="Id" />
                             </EditTemplate>
+
                             <Template Context="producto">
                                 @producto.Categoria?.Nombre
                             </Template>
