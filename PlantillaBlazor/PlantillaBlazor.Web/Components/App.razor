@@ -1,0 +1,47 @@
+﻿@using PlantillaBlazor.Web.Components
+
+<!DOCTYPE html>
+<html lang="es" data-layout="vertical" data-layout-style="detached" data-sidebar="light" data-topbar="dark" data-sidebar-size="lg" data-sidebar-image="none" data-preloader="disable" data-bs-theme="light" data-layout-width="fluid" data-layout-position="fixed" data-sidebar-visibility="show">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+
+    <link rel="icon" type="image/png" href="favicon.ico">
+
+    <link href="manifest.json" rel="manifest" />
+    <link rel="stylesheet" href="PlantillaBlazor.Web.styles.css" />
+    <link rel="stylesheet" href="loader/loader.css" />
+    <link rel="stylesheet" href="css/radzen/gridview.css" />
+    <link rel="stylesheet" href="toastr/toastr.min.css" />
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/default.css" />
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.js?v=@(typeof(Radzen.Colors).Assembly.GetName().Version)"></script>
+    <link rel="stylesheet" href="css/radzen/material3-base.css" />
+    <link rel="stylesheet" href="css/disconnectedAlert.css" />
+    <link rel="stylesheet" href="SweetAlert/sweetalert2.min.css" />
+    <link rel="stylesheet" href="css/common.css"  />
+    <link rel="stylesheet" href="notiflix/notiflix-3.2.7.min.css" />
+    <link rel="stylesheet" href="css/notiflix.css" />
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v3.0.6/css/line.css" />
+    <link rel="stylesheet" href="assetsModal/style.css">
+    <HeadOutlet @rendermode="InteractiveServer" />
+</head>
+<body>
+    <div id="reconnect-modal"></div>
+
+    <Routes @rendermode="InteractiveServer" />
+    <AlertaDesconectado/>
+
+    <script src="js/common.js"></script>
+    <script src="js/disconnectedAlertScript.js"></script>
+    <script src="_framework/blazor.web.js" autostart="false"></script>
+    <script src="js/boot.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="toastr/toastr.min.js"></script>
+    <script src="SweetAlert/sweetalert2.min.js"></script>
+    <script src="notiflix/notiflix-3.2.7.min.js"></script>
+    <script src="js/notiflix.js"></script>
+    <script src="js/pwa.js"></script>
+</body>
+
+</html>

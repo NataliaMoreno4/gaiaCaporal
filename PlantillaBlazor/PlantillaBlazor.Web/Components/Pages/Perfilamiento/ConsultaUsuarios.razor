@@ -1,0 +1,356 @@
+﻿@attribute [PageInfo(IdModulo = 3)]
+
+@page "/Perfilamiento/ConsultaUsuarios"
+@using PlantillaBlazor.Domain.Entities.Perfilamiento
+@using PlantillaBlazor.Services.Interfaces.Perfilamiento
+
+@inject IRolService _rolService
+@inject IUsuarioService _userService
+@inject ILogger<ConsultaUsuarios> _logger
+
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">Usuarios</h4>
+
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Perfilamiento</a></li>
+                    <li class="breadcrumb-item active">Usuarios</li>
+                </ol>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">Consulta de usuarios</h4>
+            </div>
+            <div class="card-body">
+                <div class="flex" style="justify-content: space-evenly">
+                    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Agregar nuevo usuario" Click="@InsertRow" Disabled=@(_usuarioToInsert != null || _usuarioToUpdate != null) />
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" class="mt-2 mb-4" Text="User Tracking" Click=@(() => _navigationManager.NavigateTo("/Perfilamiento/Usuario/UserTracking")) />
+
+                </div>
+
+                <RadzenDataGridApp AllowVirtualization="false"
+                                   @ref="_usuariosGrid"
+                                   Data="@_usuarios"
+                                   TItem="Usuario"
+                                   IsLoading="@_isLoading"
+                                   EditMode="DataGridEditMode.Single"
+                                   RowUpdate="@OnUpdateRow"
+                                   RowCreate="@OnCreateRow"
+                                   Sort="@Reset"
+                                   Page="@Reset"
+                                   Filter="@Reset">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="Usuario" Frozen="true" Filterable="false" Sortable="false" TextAlign="TextAlign.Center">
+                            <Template Context="usuario">
+                                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(usuario))" @onclick:stopPropagation="true">
+                                </RadzenButton>
+                            </Template>
+                            <EditTemplate Context="usuario">
+                                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(usuario))">
+                                </RadzenButton>
+                                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(usuario))">
+                                </RadzenButton>
+                            </EditTemplate>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Usuario" Width="140px" Property="FechaAdicion" Title="Fecha de Adición">
+                            <EditTemplate Context="usuario">
+                                <div style="text-align:center">
+                                    @("-")
+                                </div>
+                            </EditTemplate>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Usuario" Width="140px" TextAlign="TextAlign.Center" Property="IsActive" Title="¿Activo?">
+                            <EditTemplate Context="usuario">
+                                <RadzenCheckBox @bind-Value=@usuario.IsActive TValue="bool" />
+                            </EditTemplate>
+                            <Template Context="usuario">
+                                <center>
+                                    <div style='width: 30px; height: 30px; -moz-border-radius: 50%; -webkit-border-radius: 50%; border-radius: 50%; background: @(GetColor(usuario));'>
+                                    </div>
+                                </center>
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Usuario" Property="NombreUsuario" Title="Nombre de Usuario">
+                            <EditTemplate Context="usuario">
+                                @if (_usuarioToUpdate is null)
+                                {
+                                        <input type="text" class="form-control" @bind-value="usuario.NombreUsuario" placeholder="Nombre de Usuario" />
+                                }
+                                else
+                                {
+                                    @usuario.NombreUsuario
+                                }
+                            </EditTemplate>
+                            <Template Context="usuario">
+                                @usuario.NombreUsuario
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Usuario" Property="TipoUsuario" Title="Tipo de Usuario" />
+                        <RadzenDataGridColumn TItem="Usuario" Property="Clave" Title="Contraseña">
+                            <EditTemplate Context="usuario">
+                                @if (_usuarioToUpdate is null)
+                                {
+                                        <input type="password" class="form-control" @bind-value="usuario.Clave" placeholder="Contraseña" />
+                                }
+                                else
+                                {
+
+                                }
+                            </EditTemplate>
+                            <Template Context="usuario">
+                                ****
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Usuario" Property="Email" Title="Correo electrónico">
+                            <EditTemplate Context="usuario">
+                                <input type="email" class="form-control" @bind-value="usuario.Email" placeholder="Correo electrónico" />
+                            </EditTemplate>
+                            <Template Context="usuario">
+                                @usuario.Email
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Usuario" Property="IdRol" Title="Rol" Type="typeof(IEnumerable<long>)"
+                                              FilterValue="@_selectedRolIds" FilterOperator="FilterOperator.Contains" LogicalFilterOperator="LogicalFilterOperator.Or">
+                            <FilterTemplate>
+                                <RadzenCustomDropDown @bind-Value=@_selectedRolIds Change=@OnselectedRolIdsChange Data="@(_roles)" AllowClear="true" ValueProperty="Id" TextProperty="Nombre" Multiple="true" />
+                            </FilterTemplate>
+                            <EditTemplate Context="usuario">
+                                <RadzenCustomDropDown AllowClear="false" TValue="long" class="form-control" Placeholder="[Seleccionar]" @bind-value="usuario.IdRol" Data=@_roles TextProperty="Nombre" ValueProperty="Id" />
+                            </EditTemplate>
+                            <Template Context="usuario">
+                                @usuario.Rol?.Nombre
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Usuario" Property="Nombres" Title="Nombres">
+                            <EditTemplate Context="usuario">
+                                <input type="text" class="form-control" @bind-value="usuario.Nombres" placeholder="Nombres" />
+                            </EditTemplate>
+                            <Template Context="usuario">
+                                @usuario.Nombres
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Usuario" Property="Apellidos" Title="Apellidos">
+                            <EditTemplate Context="usuario">
+                                <input type="text" class="form-control" @bind-value="usuario.Apellidos" placeholder="Apellidos" />
+                            </EditTemplate>
+                            <Template Context="usuario">
+                                @usuario.Apellidos
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Usuario" Property="Celular" Title="Celular">
+                            <EditTemplate Context="usuario">
+                                <input type="number" class="form-control" @bind-value="usuario.Celular" placeholder="Celular" />
+                            </EditTemplate>
+                            <Template Context="usuario">
+                                @usuario.Celular
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGridApp>
+            </div>
+            <!-- end card body -->
+        </div>
+        <!-- end card -->
+    </div>
+    <!-- end col -->
+</div>
+
+
+@code {
+    private bool _isLoading = true;
+
+    private RadzenDataGrid<Usuario> _usuariosGrid;
+
+    [CascadingParameter]
+    protected UserSession? UserSession { get; set; }
+
+    private IEnumerable<Rol> _roles;
+    private IEnumerable<Usuario> _usuarios;
+
+    private Usuario _usuarioToInsert;
+    private Usuario _usuarioToUpdate;
+
+    private IEnumerable<long> _selectedRolIds;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (firstRender)
+            {
+                await LoadData();
+            }
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, "Error al consultar usuarios");
+            await _jsRuntime.NotiflixNotifyAlert("Error interno del servidor", NotiflixMessageType.failure);
+        }
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        await Task.Yield();
+
+        var tRoles = _rolService.GetRoles();
+        var tUsuarios = _userService.GetUsuarios();
+
+        await Task.WhenAll(tRoles, tUsuarios);
+
+        _roles = await tRoles;
+        _usuarios = await tUsuarios;
+
+        _usuarios = _usuarios.OrderByDescending(u => u.FechaAdicion);
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+
+    void Reset()
+    {
+        _usuarioToInsert = null;
+        _usuarioToUpdate = null;
+    }
+
+
+    async Task EditRow(Usuario usuario)
+    {
+        _usuarioToUpdate = usuario;
+        await _usuariosGrid.EditRow(usuario);
+    }
+
+    private async Task OnUpdateRow(Usuario usuario)
+    {
+        try
+        {
+            if (usuario == _usuarioToInsert)
+            {
+                _usuarioToInsert = null;
+            }
+
+            _usuarioToUpdate = null;
+
+            await _jsRuntime.NotiflixLoading(NotiflixLoadingType.hourglass, "Procesando");
+
+            string ipAddress = await _jsRuntime.GetIpAddress();
+
+            usuario.IdUsuarioUltimaActualizacion = UserSession.IdUsuario;
+
+            var respuesta = await _userService.InsertarUsuario(usuario, ipAddress);
+
+            await _jsRuntime.NotiflixRemoveLoading();
+
+            if (!respuesta.IsSuccess)
+            {
+                await _jsRuntime.NotiflixReportAlert("Error", respuesta.Error, NotiflixMessageType.failure);
+                return;
+            }
+
+            await _jsRuntime.NotiflixNotifyAlert("Información guardada correctamente", NotiflixMessageType.success);
+
+            await LoadData();
+        }
+        catch (Exception exe)
+        {
+            CancelEdit(usuario);
+            _logger.LogError(exe, "Error al guardar información de usuario");
+            await _jsRuntime.NotiflixNotifyAlert("Error al realizar esta operación", NotiflixMessageType.failure);
+        }
+    }
+
+    async Task SaveRow(Usuario usuario)
+    {
+        var respuesta = await _userService.ValidarInformacionUsuario(usuario);
+
+        if (!respuesta.IsSuccess)
+        {
+            await _jsRuntime.NotiflixReportAlert("Error", respuesta.Error, NotiflixMessageType.failure);
+            return;
+        }
+
+        await _usuariosGrid.UpdateRow(usuario);
+    }
+
+    void CancelEdit(Usuario usuario)
+    {
+        _usuarioToInsert = null;
+        _usuarioToUpdate = null;
+
+        _usuariosGrid.CancelEditRow(usuario);
+    }
+
+    async Task InsertRow()
+    {
+        _usuarioToInsert = new Usuario();
+        _usuarioToInsert.IsActive = true;
+        await _usuariosGrid.InsertRow(_usuarioToInsert);
+    }
+
+    private async Task OnCreateRow(Usuario usuario)
+    {
+        try
+        {
+            if (usuario == _usuarioToInsert)
+            {
+                _usuarioToInsert = null;
+            }
+
+            _usuarioToUpdate = null;
+
+            await _jsRuntime.NotiflixLoading(NotiflixLoadingType.hourglass, "Procesando");
+
+            string ipAddress = await _jsRuntime.GetIpAddress();
+
+            usuario.IdUsuarioAdiciono = UserSession.IdUsuario;
+
+            var respuesta = await _userService.InsertarUsuario(usuario, ipAddress);
+
+            await _jsRuntime.NotiflixRemoveLoading();
+
+            if (!respuesta.IsSuccess)
+            {
+                await _jsRuntime.NotiflixReportAlert("Error", respuesta.Error, NotiflixMessageType.failure);
+                return;
+            }
+
+            await LoadData();
+
+            await _jsRuntime.NotiflixNotifyAlert("Información guardada correctamente", NotiflixMessageType.success);
+        }
+        catch (Exception exe)
+        {
+            CancelEdit(usuario);
+            _logger.LogError(exe, "Error al guardar información de usuario");
+            await _jsRuntime.NotiflixNotifyAlert("Error al realizar esta operación", NotiflixMessageType.failure);
+        }
+    }
+
+    private string GetColor(Usuario usuario)
+    {
+        if (usuario.IsActive) return "green";
+        else return "red";
+    }
+
+
+    void OnselectedRolIdsChange(object value)
+    {
+        if (_selectedRolIds != null && !_selectedRolIds.Any())
+        {
+            _selectedRolIds = null;
+        }
+    }
+}

@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34723.18
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlantillaBlazor.Web", "PlantillaBlazor.Web\PlantillaBlazor.Web.csproj", "{103062A2-FF7B-4417-A207-0EC0FB253472}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlantillaBlazor.Persistence", "PlantillaBlazor.Persistence\PlantillaBlazor.Persistence.csproj", "{43785049-ECA9-4A57-A66B-3F66039EB0C1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlantillaBlazor.Domain", "PlantillaBlazor.Domain\PlantillaBlazor.Domain.csproj", "{B8EA37D4-2B48-4F78-86F5-4928D49AD625}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlantillaBlazor.Services", "PlantillaBlazor.Services\PlantillaBlazor.Services.csproj", "{B5A865AE-AC91-456A-851C-0414F8DBAD22}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Encriptacion", "Encriptacion\Encriptacion.csproj", "{3FF25C33-8987-4578-9AEF-24F254FD6B56}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PDFUtilities", "PDFUtilities\PDFUtilities.csproj", "{ED8A6455-5674-4614-BCEC-64ACD8CA66A9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{103062A2-FF7B-4417-A207-0EC0FB253472}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{103062A2-FF7B-4417-A207-0EC0FB253472}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{103062A2-FF7B-4417-A207-0EC0FB253472}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{103062A2-FF7B-4417-A207-0EC0FB253472}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43785049-ECA9-4A57-A66B-3F66039EB0C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43785049-ECA9-4A57-A66B-3F66039EB0C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43785049-ECA9-4A57-A66B-3F66039EB0C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43785049-ECA9-4A57-A66B-3F66039EB0C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8EA37D4-2B48-4F78-86F5-4928D49AD625}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8EA37D4-2B48-4F78-86F5-4928D49AD625}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8EA37D4-2B48-4F78-86F5-4928D49AD625}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8EA37D4-2B48-4F78-86F5-4928D49AD625}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5A865AE-AC91-456A-851C-0414F8DBAD22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5A865AE-AC91-456A-851C-0414F8DBAD22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5A865AE-AC91-456A-851C-0414F8DBAD22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5A865AE-AC91-456A-851C-0414F8DBAD22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3FF25C33-8987-4578-9AEF-24F254FD6B56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FF25C33-8987-4578-9AEF-24F254FD6B56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FF25C33-8987-4578-9AEF-24F254FD6B56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FF25C33-8987-4578-9AEF-24F254FD6B56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED8A6455-5674-4614-BCEC-64ACD8CA66A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED8A6455-5674-4614-BCEC-64ACD8CA66A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED8A6455-5674-4614-BCEC-64ACD8CA66A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED8A6455-5674-4614-BCEC-64ACD8CA66A9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DA828F92-FE91-4527-8AFC-7A5B89EF2542}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,163 @@
+﻿@page "/signin-oidc"
+@using PlantillaBlazor.Domain.Constants
+@using PlantillaBlazor.Domain.Entities.Perfilamiento
+@using PlantillaBlazor.Web.Components.Layout.Login
+@using System.ComponentModel.DataAnnotations
+@using System.Text.RegularExpressions
+
+@layout LoginLayout
+
+@inject IUsuarioService _usuarioService
+@inject ILogger<OIDC> _logger
+
+@if (_isLoading)
+{
+    <_Loading />
+}
+else
+{
+    <div class="p-lg-5 p-4">
+        <div>
+            <h5 class="text-primary">Bienvenido @_currentUser.Nombres!</h5>
+            <p class="text-muted">Ingresa los siguientes datos para continuar</p>
+        </div>
+
+        <div class="mt-4">
+            <EditForm Model="_model" class="form-pass" OnValidSubmit="GuardarInfoUsuario">
+                <DataAnnotationsValidator />
+                
+                <div class="mb-3">
+                    <label for="username" class="form-label">Correo electrónico</label>
+                    <input type="email" @bind-value="_model.Email" class="form-control" placeholder="Ingresa tu correo electrónico">
+                    <ValidationMessage For="() => _model.Email" class="text-validacion-error" />
+                </div>
+                <div class="mt-4">
+                    <_LoadingButton Class="btn btn-info w-100"
+                                    IsLoading="_isLoadingAceptar"
+                                    Texto="Ingresar"
+                                    Type="submit" />
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    private bool _isLoading = true;
+    private bool _isLoadingAceptar = false;
+
+    private OAuthUserDto _model = new();
+
+    private Usuario _currentUser; 
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (firstRender)
+            {
+                _isLoading = true;
+                StateHasChanged();
+
+                var authState = await authenticationState;
+
+                var user = authState.User;
+
+                if (!user.Identity.IsAuthenticated)
+                {
+                    _navigationManager.NavigateTo("/");
+                    return;
+                }
+
+                var userSession = UserSession.GetUserSessionFromClaims(user.Claims);
+
+                _currentUser = await _usuarioService.GetUsuarioById(userSession.IdUsuario);
+
+                if (_currentUser is null)
+                {
+                    _navigationManager.NavigateTo("/");
+                    return;
+                }
+
+                if (!_currentUser.TipoUsuario.Equals("OAuth"))
+                {
+                    _navigationManager.NavigateTo("/");
+                    return;
+                }
+
+                if (!_currentUser.IsActive)
+                {
+                    await _jsRuntime.NotiflixReportAlert("Error", "Este usuario está inactivo en esta aplicación", NotiflixMessageType.failure);
+                    _navigationManager.NavigateTo("/");
+                    return;
+                }
+
+                if (!string.IsNullOrEmpty(_currentUser.Email))
+                {
+                    _navigationManager.NavigateTo("/Home", true);
+                    return;
+                }
+
+                await _jsRuntime.NotiflixReportAlert("Importante", "Debes indicar a continuación tu correo electrónico", NotiflixMessageType.info);
+
+                _isLoading = false;
+                StateHasChanged();
+            }
+        }
+        catch(Exception exe)
+        {
+
+        }
+    }
+
+    private async Task GuardarInfoUsuario()
+    {
+        try
+        {
+            if (_isLoadingAceptar) return;
+
+            _isLoadingAceptar = true;
+            StateHasChanged();
+
+            await Task.Yield();
+
+            if (!Regex.Match(_model.Email, RegexConstants.EMAIL_REGEX).Success)
+            {
+                await _jsRuntime.NotiflixReportAlert("Error", "Dirección de email no válida", NotiflixMessageType.failure);
+
+                _isLoadingAceptar = false;
+                StateHasChanged();
+                return;
+            }
+
+            _currentUser.Email = _model.Email;
+
+            var result = await _usuarioService.ActualizarInfoUsuarioOAuth(_currentUser);
+
+            if (result.IsSuccess)
+            {
+                await _jsRuntime.NotiflixReportAlertWithCallback("Correcto", "Proceso realizado correctamente", NotiflixMessageType.success);
+                _navigationManager.NavigateTo("/Home");
+            }
+            else
+            {
+                await _jsRuntime.NotiflixReportAlert("Error", result.Error, NotiflixMessageType.failure);
+            }
+        }
+        catch(Exception exe)
+        {
+            _logger.LogError(exe, "Error al guardar información de usuario OAuth");
+            await _jsRuntime.NotiflixReportAlert("Error", "Error interno del servidor", NotiflixMessageType.failure);
+        }
+    }
+
+    public class OAuthUserDto
+    {
+        [Required(ErrorMessage = "Debes indicar tu correo electrónico")]
+        [EmailAddress(ErrorMessage = "Formato no válido para el correo electrónico")]
+        public string? Email { get; set; }
+    }
+}

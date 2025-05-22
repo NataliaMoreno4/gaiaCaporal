@@ -1,0 +1,354 @@
+﻿@attribute [PageInfo(IdModulo = 4)]
+
+@page "/Perfilamiento/ConsultaRoles"
+
+@using PlantillaBlazor.Domain.Entities.Perfilamiento
+@using PlantillaBlazor.Services.Interfaces.Perfilamiento
+
+
+@inject IRolService _rolService
+@inject IModuloService _moduloService
+@inject ILogger<ConsultaRoles> _logger
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">Roles</h4>
+
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Perfilamiento</a></li>
+                    <li class="breadcrumb-item active">Roles</li>
+                </ol>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">Consulta de roles</h4>
+            </div>
+            <div class="card-body">
+                <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Agregar nuevo rol" Click="@InsertRow" Disabled=@(_rolToInsert != null || _rolToUpdate != null) />
+
+                <RadzenDataGridApp AllowVirtualization="false"
+                                   @ref="_rolesGrid"
+                                   Data="@_roles"
+                                   TItem="Rol"
+                                   IsLoading="@_isLoading"
+                                   EditMode="DataGridEditMode.Single"
+                                   RowUpdate="@OnUpdateRow"
+                                   RowCreate="@OnCreateRow"
+                                   Sort="@Reset"
+                                   Page="@Reset"
+                                   Filter="@Reset">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="Rol" Frozen="true" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="90px">
+                            <Template Context="rol">
+                                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(rol))" @onclick:stopPropagation="true">
+                                </RadzenButton>
+                            </Template>
+                            <EditTemplate Context="rol">
+                                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(rol))">
+                                </RadzenButton>
+                                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(rol))">
+                                </RadzenButton>
+                            </EditTemplate>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Rol" Title="Módulos" Width="90px" TextAlign="TextAlign.Center">
+                            <EditTemplate>
+
+                            </EditTemplate>
+                            <Template Context="rol">
+                                <input type="image" @onclick=@(() => EditarModulosRol(rol)) src="images/list-icon.png" style="width: 30px" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Rol" Property="FechaAdicion" Title="Fecha de Adición">
+                            <EditTemplate Context="rol">
+                                <div style="text-align:center">
+                                    @("-")
+                                </div>
+                            </EditTemplate>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Rol" Property="Nombre" Title="Nombre">
+                            <EditTemplate Context="rol">
+                                <input type="text" class="form-control" @bind-value="rol.Nombre" />
+                            </EditTemplate>
+                            <Template Context="rol">
+                                @rol.Nombre
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                    </Columns>
+                </RadzenDataGridApp>
+            </div>
+            <!-- end card body -->
+        </div>
+        <!-- end card -->
+    </div>
+    <!-- end col -->
+</div>
+
+@if (!_isLoading)
+{
+    <_ModalComponent @ref="_modalModulosRol"
+                     IsLoading="false"
+                     Titulo=@($"Asignar módulos a rol {_selectedRole.Nombre.ToUpper()}")
+                     Width="1000">
+        <CuerpoModal>
+            <div class="row">
+                <div class="col-md-12">
+                    <RadzenDataGridApp @ref="_grid"
+                                       AllowRowSelectOnRowClick="@_allowRowSelectOnRowClick"
+                                       LogicalFilterOperator="LogicalFilterOperator.Or"
+                                       Data="@_modulos"
+                                       TItem="Modulo"
+                                       SelectionMode="DataGridSelectionMode.Multiple"
+                                       @bind-Value=@_selectedModules>
+                        <Columns>
+                            <RadzenDataGridColumn TItem="Modulo" Width="30px" Sortable="false" Filterable="false">
+                                <HeaderTemplate>
+                                    <RadzenCheckBox TriState="false" TValue="bool" Value="@(_modulos.Any(i => _selectedModules != null && _selectedModules.Contains(i)))"
+                                                    Change="@(args => _selectedModules = args ? _modulos.ToList() : null)" />
+                                </HeaderTemplate>
+                                <Template Context="data">
+                                    <RadzenCheckBox TriState="false" Value="@(_selectedModules != null && _selectedModules.Contains(data))"
+                                                    TValue="bool" Change=@(args => { if(!_allowRowSelectOnRowClick) { _grid.SelectRow(data); }}) />
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Modulo" Property="NombreModulo" Title="Nombre"></RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Modulo" Property="Nivel" Title="Nivel"></RadzenDataGridColumn>
+                        </Columns>
+                    </RadzenDataGridApp>
+                </div>
+            </div>
+        </CuerpoModal>
+        <FooterModal>
+            <button type="button" class="btn btn-secondary" @onclick=@(() => _modalModulosRol.CerrarModal())>Cerrar</button>
+            <button type="button" class="btn btn-primary" @onclick="ActualizarModulosRol">Aceptar</button>
+        </FooterModal>
+    </_ModalComponent>
+}
+
+@code {
+    private bool _isLoading = true;
+
+    private RadzenDataGrid<Rol> _rolesGrid;
+
+    [CascadingParameter]
+    protected UserSession? UserSession { get; set; }
+
+    private IEnumerable<Rol> _roles;
+    private IEnumerable<Modulo> _modulos;
+
+    private Rol _rolToInsert;
+    private Rol _rolToUpdate;
+
+    private _ModalComponent _modalModulosRol;
+    private Rol _selectedRole = new();
+    private IList<Modulo> _selectedModules;
+    private bool _allowRowSelectOnRowClick = true;
+    private RadzenDataGridApp<Modulo> _grid;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (firstRender)
+            {
+                await LoadData();
+            }
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, "Error al consultar roles");
+            await _jsRuntime.NotiflixNotifyAlert("Error interno del servidor", NotiflixMessageType.failure);
+        }
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        await Task.Yield();
+
+        var tRoles = _rolService.GetRoles();
+        var tModulos = _moduloService.GetModulos();
+
+        await Task.WhenAll(tRoles, tModulos);
+
+        _roles = await tRoles;
+        _modulos = await tModulos;
+
+        _roles = _roles.OrderByDescending(r => r.FechaAdicion);
+        _modulos = _modulos.OrderBy(m => m.Nivel);
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    void Reset()
+    {
+        _rolToInsert = null;
+        _rolToUpdate = null;
+    }
+
+    async Task EditRow(Rol rol)
+    {
+        _rolToUpdate = rol;
+        await _rolesGrid.EditRow(rol);
+    }
+
+    private async Task OnUpdateRow(Rol rol)
+    {
+        try
+        {
+            if (rol == _rolToInsert)
+            {
+                _rolToInsert = null;
+            }
+
+            _rolToUpdate = null;
+
+            await _jsRuntime.NotiflixLoading(NotiflixLoadingType.hourglass, "Procesando");
+
+            string ipAddress = await _jsRuntime.GetIpAddress();
+
+            rol.IdUsuarioUltimaActualizacion = UserSession.IdUsuario;
+
+            var respuesta = await _rolService.InsertarRol(rol, ipAddress);
+
+            await _jsRuntime.NotiflixRemoveLoading();
+
+            if (!respuesta.IsSuccess)
+            {
+                await _jsRuntime.NotiflixReportAlert("Error", respuesta.Error, NotiflixMessageType.failure);
+                return;
+            }
+
+            await LoadData();
+
+            await _jsRuntime.NotiflixNotifyAlert("Información guardada correctamente", NotiflixMessageType.success);
+        }
+        catch (Exception exe)
+        {
+            CancelEdit(rol);
+            _logger.LogError(exe, "Error al guardar información de rol");
+            await _jsRuntime.NotiflixReportAlert("Error", "Error al realizar esta operación", NotiflixMessageType.failure);
+        }
+    }
+
+    async Task SaveRow(Rol rol)
+    {
+        var respuesta = _rolService.ValidarInformacionRol(rol);
+
+        if (!respuesta.IsSuccess)
+        {
+            await _jsRuntime.NotiflixReportAlert("Error", respuesta.Error, NotiflixMessageType.failure);
+            return;
+        }
+
+        await _rolesGrid.UpdateRow(rol);
+    }
+
+    void CancelEdit(Rol rol)
+    {
+        _rolToInsert = null;
+        _rolToUpdate = null;
+
+        _rolesGrid.CancelEditRow(rol);
+    }
+
+    async Task InsertRow()
+    {
+        _rolToInsert = new Rol();
+        await _rolesGrid.InsertRow(_rolToInsert);
+    }
+
+    private async Task OnCreateRow(Rol rol)
+    {
+        try
+        {
+            if (rol == _rolToInsert)
+            {
+                _rolToInsert = null;
+            }
+
+            _rolToUpdate = null;
+
+            await _jsRuntime.NotiflixLoading(NotiflixLoadingType.hourglass, "Procesando");
+
+            string ipAddress = await _jsRuntime.GetIpAddress();
+
+            rol.IdUsuarioAdiciono = UserSession.IdUsuario;
+
+            await _jsRuntime.NotiflixRemoveLoading();
+
+            var respuesta = await _rolService.InsertarRol(rol, ipAddress);
+
+            if (!respuesta.IsSuccess)
+            {
+                await _jsRuntime.NotiflixReportAlert("Error", respuesta.Error, NotiflixMessageType.failure);
+                return;
+            }
+
+            await LoadData();
+
+            await _jsRuntime.NotiflixNotifyAlert("Información guardada correctamente", NotiflixMessageType.success);
+        }
+        catch (Exception exe)
+        {
+            CancelEdit(rol);
+            _logger.LogError(exe, "Error al guardar información de rol");
+            await _jsRuntime.NotiflixReportAlert("Error", "Error al realizar esta operación", NotiflixMessageType.failure);
+        }
+    }
+
+    private async Task EditarModulosRol(Rol rol)
+    {
+        _selectedRole = rol;
+        _selectedModules = _selectedRole.ListaRolModulo
+                                        .Select(m => _modulos.FirstOrDefault(modulo => modulo.Id == m.IdModulo)!)
+                                        .ToList();
+        await _modalModulosRol.AbrirModal();
+    }
+
+    private async Task ActualizarModulosRol()
+    {
+        try
+        {
+            await _jsRuntime.NotiflixLoading(NotiflixLoadingType.hourglass, "Procesando");
+
+            _selectedRole.ListaRolModulo = _selectedModules.Select(m => new RolModulo() { IdModulo = m.Id }).ToList();
+
+            var ipAddress = await _jsRuntime.GetIpAddress();
+
+            _selectedRole.IdUsuarioUltimaActualizacion = UserSession.IdUsuario;
+
+            var response = await _rolService.InsertarRol(_selectedRole, ipAddress);
+
+            await _jsRuntime.NotiflixRemoveLoading();
+
+            if (response.IsSuccess)
+            {
+                await _jsRuntime.NotiflixReportAlertWithCallback("Correcto", "Módulos actualizados correctamente", NotiflixMessageType.success);
+                _navigationManager.NavigateTo("/Perfilamiento/ConsultaRoles", forceLoad: true);
+            }
+            else
+            {
+                await _jsRuntime.NotiflixReportAlert("Error", response.Error, NotiflixMessageType.failure);
+            }
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, $"Error al actualizar módulos para rol {_selectedRole.Id}");
+            await _jsRuntime.NotiflixReportAlert("Error", "Error interno del servidor", NotiflixMessageType.failure);
+        }
+    }
+}
+

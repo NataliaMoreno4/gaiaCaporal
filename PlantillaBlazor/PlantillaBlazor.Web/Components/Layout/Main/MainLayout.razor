@@ -1,0 +1,419 @@
+﻿@using PlantillaBlazor.Domain.Entities.Perfilamiento
+@using PlantillaBlazor.Services.Interfaces.Perfilamiento
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
+
+@inherits LayoutComponentBase
+
+@inject IUsuarioService _usuarioService
+@inject ILogger<MainLayout> _logger
+
+<PageTitle>Demo Blazor V2</PageTitle>
+
+<HeadContent>
+    <!-- jsvectormap css -->
+    <link href="assetsMainSite/libs/jsvectormap/css/jsvectormap.min.css" rel="stylesheet" type="text/css" />
+
+    <!--Swiper slider css-->
+    <link href="assetsMainSite/libs/swiper/swiper-bundle.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- Bootstrap Css -->
+    <link href="assetsMainSite/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <!-- Icons Css -->
+    <link href="assetsMainSite/css/icons.min.css" rel="stylesheet" type="text/css" />
+    <!-- App Css-->
+    <link href="assetsMainSite/css/app.min.css" rel="stylesheet" type="text/css" />
+    <!-- custom Css-->
+    <link href="assetsMainSite/css/custom.min.css" rel="stylesheet" type="text/css" />
+    <link href="css/mainSite/styles.css" rel="stylesheet" type="text/css" />
+</HeadContent>
+
+<_LoadingSpinner></_LoadingSpinner>
+
+@if (_isLoading)
+{
+    <_Loading></_Loading>
+}
+else
+{
+    <RadzenComponents />
+
+    <div id="layout-wrapper">
+        <!--!-->
+        <header id="page-topbar">
+            <div class="layout-width">
+                <div class="navbar-header">
+                    <div class="d-flex">
+                        <div class="navbar-brand-box horizontal-logo">
+                            <a href="/Home" class="logo logo-dark">
+                                <span class="logo-sm"><img src="images/logo_globo_amarill.png" alt="" height="22"></span>
+                                <span class="logo-lg">
+                                    <img src="images/logo.png" alt=""
+                                         height="40">
+                                </span>
+                            </a>
+
+                            <a href="/Home" class="logo logo-light">
+                                <span class="logo-sm">
+                                    <img src="images/logo.png" alt="" height="40">
+                                </span>
+                                <span class="logo-lg">
+                                    <img src="images/logo-white.png" alt=""
+                                         height="40">
+                                </span>
+                            </a>
+                        </div>
+
+                        <button type="button" class="btn btn-sm px-3 fs-16 header-item vertical-menu-btn topnav-hamburger"
+                                id="topnav-hamburger-icon">
+                            <span class="hamburger-icon">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </span>
+                        </button>
+
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        
+
+                        <div class="dropdown ms-sm-3 header-item topbar-user">
+                            <button type="button" class="btn"
+                                    id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false">
+                                <span class="d-flex align-items-center">
+                                    <img class="rounded-circle header-profile-user"
+                                         src="images/userIcon.png" alt="Header Avatar">
+                                    <span class="text-start ms-xl-2">
+                                        <span class="d-none d-xl-inline-block ms-1 fw-semibold user-name-text">
+                                            @_nombreUsuario
+                                        </span>
+                                        <span class="d-none d-xl-block ms-1 fs-13 user-name-sub-text">@_nombreRol</span>
+                                    </span>
+                                </span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <h6 class="dropdown-header">Bienvenid@@ @_nombreUsuario!</h6>
+
+                                <a class="dropdown-item" @onclick="CerrarSesion" href="javascript:void(0)">
+                                    <i class="mdi mdi-logout text-muted fs-16 align-middle me-1"></i> <span class="align-middle" data-key="t-logout">Cerrar Sesión</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!--!-->
+        <div class="app-menu navbar-menu">
+            <div class="navbar-brand-box">
+                <a href="/Home" class="logo logo-dark">
+                    <span class="logo-sm">
+                        <img src="images/logo_globo_amarill.png" alt="" height="22">
+                    </span>
+                    <span class="logo-lg"><img src="images/logo.png" alt="" height="40"></span>
+                </a>
+
+                <a href="/Home" class="logo logo-light">
+                    <span class="logo-sm">
+                        <img src="mages/logo_globo_amarill.png" alt="" height="22">
+                    </span>
+                    <span class="logo-lg"><img src="assetsMainSite/images/logo-light.png" alt="" height="17"></span>
+                </a>
+                <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover"
+                        id="vertical-hover">
+                    <i class="ri-record-circle-line"></i>
+                </button>
+            </div>
+            <CascadingValue Value="_userSession">
+                <NavMenu></NavMenu>
+            </CascadingValue>
+            
+
+            <div class="sidebar-background"></div>
+        </div>
+
+
+        <div class="vertical-overlay"></div>
+
+
+        <div class="main-content">
+            <div class="page-content">
+                <div class="container-fluid">
+                    <AuthorizeView>
+                        <Authorized>
+                            <CascadingValue Value="@_userSession">
+                                <PageAuthorizationView>
+                                    <Authorize>
+                                        @Body
+                                    </Authorize>
+                                    <NotAuthorize>
+                                        <_Page403></_Page403>
+                                    </NotAuthorize>
+                                </PageAuthorizationView>
+                            </CascadingValue>
+                        </Authorized>
+                        <NotAuthorized>
+                            <p>No está autorizado a ver este contenido, autentíquese nuevamente</p>
+                        </NotAuthorized>
+                    </AuthorizeView>
+
+                    
+                </div>
+            </div><!--!-->
+            <!--!-->
+            <footer class="footer">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            @DateTime.Now.Year © Excellentiam SE.
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="text-sm-end d-none d-sm-block">
+                                Desarrollado por Excellentiam Soluciones Empresariales
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+}
+
+@code {
+    private bool _isLoading = true;
+    private string _nombreUsuario = string.Empty;
+    private string _nombreRol = string.Empty;
+
+    private UserSession _userSession = new UserSession();
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firsRender)
+    {
+        try
+        {
+            if (firsRender)
+            {
+                if (!await ValidarAutenticacionUsuario())
+                {
+                    _navigationManager.NavigateTo("/");
+                    return;
+                }
+
+                _isLoading = false;
+                StateHasChanged();
+            }
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, $"Error al cargar Main Layout");
+            await _jsRuntime.NotiflixReportAlert("Error", "Error interno del servidor", NotiflixMessageType.failure);
+        }
+    }
+
+    private async Task<bool> ValidarAutenticacionUsuario()
+    {
+        if (authenticationState is null) return false;
+
+        var authState = await authenticationState;
+        var user = authState?.User;
+
+        if (user?.Identity is null || !user.Identity.IsAuthenticated)
+        {
+            return false;
+        }
+
+        _userSession = UserSession.GetUserSessionFromClaims(user.Claims);
+
+        if (_userSession is null) return false;
+
+        var session = await _sessionService.GetSessionById(long.Parse(_userSession.IdSession));
+
+        if (session is null) return false;
+
+        long idAuditoria = 0;
+
+        if (!long.TryParse(_userSession.IdAuditoriaLogin, out idAuditoria))
+        {
+            return false;
+        }
+
+        var ipAddress = await _jsRuntime.GetIpAddress();
+
+        //Sesión inactivada
+        if (!session.IsActive)
+        {
+            string motivo = $"La sesión con ID {session.Id} se vence ya que ha sido desactivada";
+            await _usuarioService.RegistrarAuditoriaCierreSesion(idAuditoria, ipAddress, motivo);
+
+            await CloseSession();
+            return false;
+        }
+
+        //La sesión se vence si han pasado más de 2 días desde último login
+        if ((DateTime.Now - session.FechaUltimoIngreso!.Value).TotalDays > 2)
+        {
+            string motivo = $"La sesión se vence ya que han han pasado más de 2 días desde último login {session.FechaUltimoIngreso.GetValueOrDefault()}";
+            await _usuarioService.RegistrarAuditoriaCierreSesion(idAuditoria, ipAddress, motivo);
+
+            await CloseSession();
+            return false;
+        }
+
+        string urlActual = _navigationManager.BaseUri;
+        urlActual = urlActual.Remove(urlActual.Length - 1);
+
+        urlActual = urlActual.Replace("https://", "");
+        urlActual = urlActual.Replace("http://", "");
+
+        string urlCookie = _userSession.Url;
+        urlCookie = urlCookie.Replace("https://", "");
+        urlCookie = urlCookie.Replace("http://", "");
+
+        if (!urlActual.Equals(urlCookie))
+        {
+            string motivo = $"La sesión se cierra ya que existe un conflicto de cookies con otro sitio web (URL ACTUAL:{urlActual}/ URL DE LA COOKIE: {_userSession.Url}-{session.Host})";
+            await _usuarioService.RegistrarAuditoriaCierreSesion(idAuditoria, ipAddress, motivo);
+
+            await CloseSession();
+            return false;
+        }
+
+        Usuario tempUser = await _usuarioService.GetUsuarioById(_userSession.IdUsuario);
+
+        if (tempUser is null)
+        {
+            await CloseSession();
+            return false;
+        }
+
+        //Usuario inactivo
+        if (!tempUser.IsActive)
+        {
+            string motivo = $"La sesión se vence ya que se ha inactivado el usuario";
+            await _usuarioService.RegistrarAuditoriaCierreSesion(idAuditoria, ipAddress, motivo);
+
+            await CloseSession();
+            return false;
+        }
+
+        //Debe cambiar la contraseña
+        if (tempUser.MustChangePassword)
+        {
+            await _usuarioService.RegistrarAuditoriaCierreSesion(idAuditoria, ipAddress, $"La sesión se vence ya que se indicó que el usuario debe cambiar la contraseña en su próximo ingreso");
+
+            await CloseSession();
+            return false;
+        }
+
+        if (tempUser.TipoUsuario!.Equals("OAuth") && string.IsNullOrEmpty(tempUser.Email))
+        {
+            return false;
+        }
+
+        await _usuarioService.ProcesarIngreso(tempUser, ipAddress, "Exitoso, ingreso por RememberMe o validez de cookie");
+        await _sessionService.ProcesarIngresoUsuario(session);
+        await _jsRuntime.InitializeInactivityTimer(DotNetObjectReference.Create(this));
+
+        _authenticationService.conectarCircuito(_userSession);
+
+        _nombreUsuario = tempUser.NombreUsuario;
+        _nombreRol = tempUser.Rol?.Nombre;
+
+        return true;
+    }
+
+
+    private async Task CerrarSesion()
+    {
+        try
+        {
+            var ipAddress = await _jsRuntime.GetIpAddress();
+            await _usuarioService.RegistrarAuditoriaCierreSesion(long.Parse(_userSession.IdAuditoriaLogin), ipAddress, $"Cierre de sesión manual");
+            await CloseSession();
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, "Error al cerrar sesión");
+        }
+    }
+
+    private async Task CloseSession()
+    {
+        try
+        {
+            string tipoUsuario = _userSession.TipoUsuario;
+
+            if (tipoUsuario.Equals("Normal"))
+            {
+                _navigationManager.NavigateTo("/auth/logout", forceLoad: true);
+                return;
+            }
+            else if (tipoUsuario.Equals("OAuth"))
+            {
+                _navigationManager.NavigateTo("/api/account/logout", forceLoad: true);
+                return;
+            }
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, "Error al cerrar sesión");
+        }
+
+        _navigationManager.NavigateTo("/auth/logout", forceLoad: true);
+    }
+
+    [JSInvokable]
+    public async Task Logout()
+    {
+        try
+        {
+            var ipAddress = await _jsRuntime.GetIpAddress();
+            await _usuarioService.RegistrarAuditoriaCierreSesion(long.Parse(_userSession.IdAuditoriaLogin), ipAddress, $"Cierre de la sesión por inactividad");
+
+            await CloseSession();
+            await _jsRuntime.InvokeVoidAsync("warningToastr", "Tu sesión ha sido cerrada debido a inactividad");
+        }
+        catch (Exception exe)
+        {
+
+        }
+    }
+
+    [JSInvokable]
+    public async Task AlertaLogout()
+    {
+        if (authenticationState is null) return;
+
+        var authState = await authenticationState;
+        var user = authState?.User;
+
+        if (user?.Identity is null || !user.Identity.IsAuthenticated)
+        {
+            return;
+        }
+
+        await _jsRuntime.DisplayWarningToastr("Tu sesión caducará en 3 minutos por inactividad");
+    }
+
+    [JSInvokable]
+    public async Task<string> GetActualUserName()
+    {
+        if (authenticationState is null) return "";
+
+        var authState = await authenticationState;
+        var user = authState?.User;
+
+        if (user?.Identity is null || !user.Identity.IsAuthenticated)
+        {
+            return "";
+        }
+
+        return _userSession.IdUsuario.ToString();
+    }
+}

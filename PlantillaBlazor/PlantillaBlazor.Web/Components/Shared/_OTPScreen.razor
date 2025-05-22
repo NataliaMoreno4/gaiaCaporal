@@ -1,0 +1,88 @@
+﻿@using PlantillaBlazor.Domain.DTO.OTP
+
+
+
+<div class="w-px-400 mx-auto">
+    <!-- Logo -->
+    <div class="app-brand mb-5">
+        <img src="images/logo.png" loading="lazy" width="300" />
+    </div>
+    <!-- /Logo -->
+
+    <h4 class="mb-2">Verificación OTP 💬</h4>
+    <p class="text-start mb-4">
+        @if (EnviandoOtp)
+        {
+            <span>Enviando mensajes...</span>
+            <_Loading></_Loading>
+        }
+        else
+        {
+            <span>@Mensaje</span> 
+        }
+    </p>
+    <p class="mb-0 fw-medium">Digita tu código de seguridad de 6 dígitos</p>
+    <div class="mb-3">
+        <div class="auth-input-wrapper d-flex align-items-center justify-content-sm-between numeral-mask-wrapper digit-group">
+
+            <input type="number" class="form-control auth-input h-px-50 text-center numeral-mask mx-1 my-2" id="digit-1" name="digit-1"
+                   data-next="digit-2" @bind="OtpCode.C1">
+            <input type="number" class="form-control auth-input h-px-50 text-center numeral-mask mx-1 my-2" id="digit-2" name="digit-2"
+                   data-next="digit-3" data-previous="digit-1" @bind="OtpCode.C2">
+            <input type="number" class="form-control auth-input h-px-50 text-center numeral-mask mx-1 my-2" id="digit-3" name="digit-3"
+                   data-next="digit-4" data-previous="digit-2" @bind="OtpCode.C3">
+            <input type="number" class="form-control auth-input h-px-50 text-center numeral-mask mx-1 my-2" id="digit-4" name="digit-4"
+                   data-next="digit-5" data-previous="digit-3" @bind="OtpCode.C4">
+            <input type="number" class="form-control auth-input h-px-50 text-center numeral-mask mx-1 my-2" id="digit-5" name="digit-5"
+                   data-next="digit-6" data-previous="digit-4" @bind="OtpCode.C5">
+            <input type="number" class="form-control auth-input h-px-50 text-center numeral-mask mx-1 my-2" id="digit-6" name="digit-6"
+                   data-previous="digit-5" @bind="OtpCode.C6">
+        </div>
+    </div>
+    @if (OtpEnviado)
+    {
+        <_LoadingButton 
+            Type="submit"
+            Class="btn btn-primary w-100 mb-3"
+            IsLoading="ValidandoOtp"
+            OnClicked="EventoVerificarOTP"
+            Texto="Verificar"
+            
+        />
+        <div class="text-center">
+            @MensajeReenviar1
+            <a href="javascript:void(0);" @onclick="EventoReenviarOTP">
+                @MensajeReenviar2
+            </a>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public bool EnviandoOtp { get; set; } = true;
+
+    [Parameter]
+    public bool ValidandoOtp { get; set; } = true;
+
+    [Parameter]
+    public bool OtpEnviado { get; set; } = false;
+
+    [Parameter]
+    public OtpDto OtpCode { get; set; }
+
+    [Parameter]
+    public EventCallback EventoVerificarOTP { get; set; }
+
+    [Parameter]
+    public EventCallback EventoReenviarOTP { get; set; }
+
+    [Parameter]
+    public string Mensaje { get; set; } = "El código ha sido enviado al e-mail y celular registrados";
+
+    [Parameter]
+    public string MensajeReenviar1 { get; set; } = "¿No recibiste el OTP?";
+
+    [Parameter]
+    public string MensajeReenviar2 { get; set; } = "Reenviar";
+}

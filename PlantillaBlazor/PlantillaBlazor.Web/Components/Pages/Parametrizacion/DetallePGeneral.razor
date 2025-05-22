@@ -1,0 +1,189 @@
+﻿@attribute [PageInfo(IdModulo = 6)]
+
+@page "/Parametrizacion/DetalleParametroGeneral"
+@page "/Parametrizacion/DetalleParametroGeneral/{idParametroGeneral}"
+@using PlantillaBlazor.Domain.Entities.Parametrizacion
+@using PlantillaBlazor.Services.Interfaces.Parametrizacion
+
+@inject IParametroGeneralService _pGeneralService
+@inject ILogger<DetallePGeneral> _logger
+
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">Parámetros Generales</h4>
+
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Parametrización</a></li>
+                    <li class="breadcrumb-item active">Parámetros Generales</li>
+                </ol>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@if (_isLoading)
+{
+    <_Loading></_Loading>
+}
+else
+{
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">Información del Parámetro General</h4>
+                </div>
+                <div class="card-body">
+                    <p class="card-title-desc"></p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Nombre</label>
+                                <input type="text" class="form-control" @bind-value="parametroGeneral.Nombre" />
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="table-responsive">
+                                <table class="table caption-top table-nowrap mb-0">
+                                    <caption>Lista de parámetros detallados</caption>
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th scope="col" style="text-align:center">#</th>
+                                            <th scope="col">Nombre</th>
+                                            <th scope="col"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            int i = 1;
+                                        }
+                                        @foreach (var p in parametroGeneral.ListaParametrosDetallados)
+                                        {
+                                            <_ParametroDetallado pDetallado=@p
+                                                                 Consecutivo=@i
+                                                                 EventoEliminarPDetallado=@(() => EliminarPDetallado(p))>
+                                            </_ParametroDetallado>
+                                            i++;
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <input type="image" src="images/sign-add-icon.png" width="40" style="float:right" @onclick="AgregarPDetallado">
+                        </div>
+                    </div>
+                    <br>
+                    <br>
+                    <button class="btn btn-primary" type="button" @onclick="InsertarParametroGeneral">Aceptar</button>
+                    <button class="btn btn-secondary" type="button" @onclick=@(() => _navigationManager.NavigateTo("/Parametrizacion/ConsultaParametroGeneral"))>Volver</button>
+                </div>
+                <!-- end card body -->
+            </div>
+            <!-- end card -->
+        </div>
+        <!-- end col -->
+    </div>
+}
+
+
+
+
+@code {
+    [Parameter]
+    public string idParametroGeneral { get; set; } = "";
+
+    private bool _isLoading = true;
+
+    private ParametroGeneral parametroGeneral = new ParametroGeneral();
+
+    [CascadingParameter]
+    protected UserSession? UserSession { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if(firstRender)
+            {
+                _isLoading = true;
+                StateHasChanged();
+
+                if (!string.IsNullOrEmpty(idParametroGeneral))
+                {
+                    parametroGeneral = await _pGeneralService.ConsultarParametroGeneralById(long.Parse(idParametroGeneral));
+                }
+
+                _isLoading = false;
+                StateHasChanged();
+            }
+        }
+        catch(Exception exe)
+        {
+            _logger.LogError(exe, $"Error al consultar parámetro general {idParametroGeneral}");
+            await _jsRuntime.NotiflixReportAlert("Error", "Error al consultar la información del parámetro general", NotiflixMessageType.failure);
+        }
+    }
+
+    private async Task InsertarParametroGeneral()
+    {
+        try{
+            await _jsRuntime.NotiflixLoading(NotiflixLoadingType.hourglass, "Procesando");
+
+            if(parametroGeneral.Id > 0)
+            {
+                parametroGeneral.IdUsuarioUltimaActualizacion = UserSession.IdUsuario;
+            }
+            else
+            {
+                parametroGeneral.IdUsuarioAdiciono = UserSession.IdUsuario;
+            }
+
+            var response = await _pGeneralService.InsertarInfoParametroGeneral(parametroGeneral);
+
+            await _jsRuntime.NotiflixRemoveLoading();
+
+            if(response.IsSuccess)
+            {
+                await _jsRuntime.NotiflixReportAlertWithCallback("Correcto", "Proceso realizado correctamente", NotiflixMessageType.success);
+                _navigationManager.NavigateTo("/Parametrizacion/ConsultaParametroGeneral");
+            }
+            else
+            {
+                await _jsRuntime.NotiflixReportAlert("Error", response.Error, NotiflixMessageType.failure);
+            }
+        }
+        catch(Exception exe)
+        {
+            _logger.LogError(exe, $"Error al guardar la información del parámetro general {idParametroGeneral}");
+            await _jsRuntime.NotiflixReportAlert("Error", "Error al guardar la información del parámetro general", NotiflixMessageType.failure);
+        }
+    }
+
+
+    private async Task EliminarPDetallado(ParametroDetallado pDetallado)
+    {
+        try
+        {
+            bool resultado = await _jsRuntime.NotiflixConfirmShow("Eliminar parametro detallado", "¿Está seguro de eliminar definitivamente este parámetro detallado?");
+
+            if(resultado)
+            {
+                await _pGeneralService.EliminarParametroDetallado(pDetallado.Id);
+                parametroGeneral.ListaParametrosDetallados.Remove(pDetallado);
+            }
+        }
+        catch(Exception exe)
+        {
+            _logger.LogError(exe, $"Error al eliminar parámetro detallado {pDetallado.Id}");
+            await _jsRuntime.NotiflixReportAlert("Error", "Error al eliminar este parámetro detallado",NotiflixMessageType.failure);
+        }
+    }
+
+    private async Task AgregarPDetallado()
+    {
+        parametroGeneral.ListaParametrosDetallados.Add(new ParametroDetallado());
+    }
+}

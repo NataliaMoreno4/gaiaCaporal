@@ -1,0 +1,197 @@
+﻿@using PlantillaBlazor.Domain.DTO.Perfilamiento
+@using PlantillaBlazor.Services.Interfaces.Perfilamiento
+@using PlantillaBlazor.Domain.Entities.Perfilamiento
+@using PlantillaBlazor.Web.Components.Layout.Login
+
+@layout LoginLayout
+
+@page "/CambioPass/{IdSolicitud}"
+
+@inject IUsuarioService _userService
+@inject ILogger<CambioContraseña> _logger
+
+<PageTitle>Recuperación de Contraseña | Demo Blazor V2</PageTitle>
+
+@if (_isLoading)
+{
+    <_Loading></_Loading>
+}
+else
+{
+    <div class="p-lg-5 p-4">
+        <h5 class="text-primary">Crea una nueva contraseña</h5>
+        <p class="text-muted">A continuación ingresa tu nueva contraseña</p>
+
+        <div class="p-2 form-pass">
+            <EditForm Model="_model" OnValidSubmit="Restablecer">
+                <AntiforgeryToken />
+                <DataAnnotationsValidator />
+
+                <div class="mb-3">
+                    <label class="form-label" for="password-input">Contraseña</label>
+                    <div class="position-relative auth-pass-inputgroup">
+                        <_PasswordField @bind-BindingValue="_model.Contraseña" />
+                        <ValidationMessage For="() => _model.Contraseña" class="text-validacion-error" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="confirm-password-input">Confirma la nueva contraseña</label>
+                    <div class="position-relative auth-pass-inputgroup mb-3">
+                        <_PasswordField @bind-BindingValue="_model.ConfirmacionContraseña" />
+                        <ValidationMessage For="() => _model.ConfirmacionContraseña" class="text-validacion-error" />
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <_LoadingButton 
+                        Class="btn btn-success w-100"
+                        IsLoading="_isLoadingGuard"
+                        Texto="Continuar"
+                        Type="submit"
+                        />
+                </div>
+            </EditForm>
+        </div>
+
+        <div class="mt-2 text-center">
+            <a href="/Login" class="fw-semibold text-primary text-decoration-underline"> Login </a>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string IdSolicitud { get; set; }
+
+    private bool _isLoading = true;
+    private bool _isLoadingGuard = false;
+
+    private SolicitudRecuperacionClave _solicitud;
+    private Dictionary<string, string> _parametros;
+
+    private CambioContraseñaModel _model = new();
+
+    protected override async Task OnAfterRenderAsync(bool firsRender)
+    {
+        try
+        {
+            if (firsRender)
+            {
+                _isLoading = false;
+                StateHasChanged();
+            }
+        }
+        catch (Exception exe)
+        {
+
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _parametros = _encryptService.DesencriptarParametros(IdSolicitud);
+
+            _solicitud = await _userService.GetSolicitudContraseña(long.Parse(_parametros["idSolicitud"]));
+
+            if (_solicitud is null)
+            {
+                await _jsRuntime.NotiflixReportAlert("Error", "URL no válida", NotiflixMessageType.failure);
+                return;
+            }
+
+            if (_solicitud.Estado.Equals("Finalizada"))
+            {
+                await _jsRuntime.NotiflixReportAlert("Error", "Esta solicitud ya expiró", NotiflixMessageType.failure);
+                _navigationManager.NavigateTo("/");
+            }
+
+            double diferencia = (DateTime.Now - _solicitud.FechaAdicion).TotalDays;
+
+            if (diferencia > 1)
+            {
+                await _jsRuntime.NotiflixReportAlert("Error", "Esta solicitud ya expiró", NotiflixMessageType.failure);
+                _navigationManager.NavigateTo("/");
+            }
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, $"Error al consultar información de solicitud de cambio de contraseña para solicitud {IdSolicitud}");
+            await _jsRuntime.NotiflixNotifyAlert( "Error al validar la solicitud", NotiflixMessageType.failure);
+        }
+    }
+
+    private async Task Restablecer()
+    {
+        try
+        {
+            if (_isLoadingGuard) return;
+
+            await Task.Yield();
+            _isLoadingGuard = true;
+            StateHasChanged();
+
+            if (string.IsNullOrEmpty(_model.Contraseña))
+            {
+                _isLoadingGuard = false;
+                StateHasChanged();
+
+                await _jsRuntime.NotiflixReportAlert("Error", "Debe diligenciar ambas contraseñas", NotiflixMessageType.failure);
+
+                return;
+            }
+
+            if (string.IsNullOrEmpty(_model.ConfirmacionContraseña))
+            {
+                _isLoadingGuard = false;
+                StateHasChanged();
+
+                await _jsRuntime.NotiflixReportAlert("Error", "Debe diligenciar ambas contraseñas", NotiflixMessageType.failure);
+                
+                return;
+            }
+
+            if (!_model.ConfirmacionContraseña.Equals(_model.Contraseña))
+            {
+                _isLoadingGuard = false;
+                StateHasChanged();
+
+                await _jsRuntime.NotiflixReportAlert("Error", "Las contraseñas deben coincidir", NotiflixMessageType.failure);
+
+                return;
+            }
+
+            string ipAddress = await _jsRuntime.GetIpAddress();
+
+            var respuesta = await _userService.CompletarSolicitudContraseña(_solicitud.Id, _model.Contraseña, ipAddress);
+
+            if (respuesta.IsSuccess)
+            {
+                await _jsRuntime.NotiflixReportAlertWithCallback("Correcto", "Solicitud de recuperación de contraseña finalizada", NotiflixMessageType.success);
+
+                _navigationManager.NavigateTo("/");
+
+                return;
+            }
+            else
+            {
+                _isLoadingGuard = false;
+                StateHasChanged();
+
+                await _jsRuntime.NotiflixReportAlert("Error", respuesta.Error, NotiflixMessageType.failure);
+                
+                return;
+            }
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, $"Error al completar solicitud de cambio de contraseña para la solicitud {IdSolicitud}");
+            await _jsRuntime.NotiflixNotifyAlert("Error al completar la solicitud", NotiflixMessageType.failure);
+        }
+
+        _isLoadingGuard = false;
+        StateHasChanged();
+    }
+}

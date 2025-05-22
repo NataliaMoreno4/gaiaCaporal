@@ -1,0 +1,44 @@
+﻿<input type="text" id="@_id" class="@Class" @bind:get="BindingValue" @bind:set="SetAsync" @bind:event="oninput" @onblur="HandleBlur" />
+
+@code {
+    [Parameter]
+    public string BindingValue { get; set; }
+
+    [Parameter]
+    public EventCallback<string> BindingValueChanged { get; set; }
+
+    [Parameter]
+    public string Class { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnBlur { get; set; }
+
+    async Task SetAsync(string value) => await BindingValueChanged.InvokeAsync(value);
+
+    private bool _isLoading = false;
+
+    private string _id = $"input{Guid.NewGuid().ToString("N")}";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (firstRender)
+            {
+                await _jsRuntime.InvokeVoidAsync("addFormatListener", _id);
+            }
+        }
+        catch(Exception exe)
+        {
+            
+        }
+    }
+
+    async Task HandleBlur(FocusEventArgs e)
+    {
+        if (OnBlur.HasDelegate)
+        {
+            await OnBlur.InvokeAsync(BindingValue);
+        }
+    }
+}

@@ -1,0 +1,81 @@
+﻿@inject ILogger<_ModalComponent> _logger
+
+<div class="overlay" id="@idModalOverlay">
+    <div class="popup" id="@idModalPopup" style="max-width:@(Width)px">
+        <header>
+            <h5 class="modal-title">@Titulo</h5>
+            <div class="close" style="font-size:50px" @onclick="CerrarModal">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M6.4 19L5 17.6l5.6-5.6L5 6.4L6.4 5l5.6 5.6L17.6 5L19 6.4L13.4 12l5.6 5.6l-1.4 1.4l-5.6-5.6z" /></svg>
+            </div>
+        </header>
+        <div class="content" style="text-align: center;">
+            <br />
+            @if (IsLoading)
+            {
+                <_Loading></_Loading>
+            }
+            else
+            {
+                @if (CuerpoModal != null)
+                {
+                    @CuerpoModal
+                }
+                else
+                {
+                    <span>Nada que mostrar</span>
+                }
+            }
+            <br />
+            @if (FooterModal is null)
+            {
+                <button type="button" class="btn btn-primary" @onclick="EventoAceptar">Aceptar</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            }
+            else
+            {
+                @FooterModal
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+
+    private string idModalPopup = "";
+    private string idModalOverlay = "";
+
+    [Parameter]
+    public bool IsLoading { get; set; } = true;
+
+    [Parameter]
+    public string Titulo { get; set; } = "";
+
+    [Parameter]
+    public RenderFragment CuerpoModal { get; set; }
+
+    [Parameter]
+    public RenderFragment FooterModal { get; set; }
+
+    [Parameter]
+    public EventCallback EventoAceptar { get; set; }
+
+    [Parameter]
+    public int Width { get; set; } = 1200;
+
+    protected override void OnInitialized()
+    {
+        idModalOverlay = "overlay" + Guid.NewGuid().ToString("N");
+        idModalPopup = "popup" + Guid.NewGuid().ToString("N");
+        base.OnInitialized();
+    }
+
+    public async Task AbrirModal()
+    {
+        await _jsRuntime.InvokeVoidAsync("abrirPopUp", idModalOverlay, idModalPopup);
+    }
+
+    public async Task CerrarModal()
+    {
+        await _jsRuntime.InvokeVoidAsync("cerrarPopUp", idModalOverlay, idModalPopup);
+    }
+}

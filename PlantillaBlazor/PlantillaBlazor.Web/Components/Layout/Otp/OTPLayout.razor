@@ -1,0 +1,91 @@
+﻿@inherits LayoutComponentBase
+
+@inject ILogger<OTPLayout> _logger
+
+<HeadContent>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&amp;display=swap" rel="stylesheet">
+
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="assetsOTP/vendor/fonts/boxicons.css" />
+    <link rel="stylesheet" href="assetsOTP/vendor/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="assetsOTP/vendor/fonts/flag-icons.css" />
+
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="assetsOTP/vendor/css/rtl/core.css" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="assetsOTP/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="assetsOTP/css/demo.css" />
+
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" href="assetsOTP/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="assetsOTP/vendor/libs/typeahead-js/typeahead.css" />
+    <!-- Vendor -->
+    <link rel="stylesheet" href="assetsOTP/vendor/libs/%40form-validation/form-validation.css" />
+
+    <!-- Page CSS -->
+    <!-- Page -->
+    <link rel="stylesheet" href="assetsOTP/vendor/css/pages/page-auth.css">
+
+    <style>
+        .authentication-bg {
+            background-color: #fff !important;
+        }
+
+        input::selection {
+            background: #696cff;
+        }
+
+    </style>
+
+</HeadContent>
+
+<_LoadingSpinner></_LoadingSpinner>
+
+<PageTitle>Verificación OTP</PageTitle>
+
+<div class="authentication-wrapper authentication-cover">
+    <div class="authentication-inner row m-0">
+
+        <!-- /Left Text -->
+        <div class="d-none d-lg-flex col-lg-7 col-xl-8 align-items-center p-5">
+            <div class="w-100 d-flex justify-content-center">
+                <img src="assetsOTP/img/illustrations/girl-verify-password-light.png" class="img-fluid" alt="Login image" width="600" data-app-dark-img="illustrations/girl-verify-password-dark.png" data-app-light-img="illustrations/girl-verify-password-light.html">
+
+            </div>
+        </div>
+        <!-- /Left Text -->
+        <!-- Two Steps Verification -->
+        <div class="d-flex col-12 col-lg-5 col-xl-4 align-items-center authentication-bg p-4 p-sm-5">
+            @Body
+        </div>
+        <!-- /Two Steps Verification -->
+    </div>
+</div>
+
+@code {
+    private bool _isLoading = true;
+
+    protected override async Task OnAfterRenderAsync(bool firsRender)
+    {
+        try
+        {
+            if(firsRender){
+                _isLoading = false;
+
+                StateHasChanged();
+
+                await _jsRuntime.LoadJSScript("../assetsOTP/js.js");
+            }
+
+            //Loader
+            await _jsRuntime.InvokeVoidAsync("agregarClase", ".loaderOverlay", "inactive");
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, $"Error al cargar OTP Template");
+        }
+    }
+}

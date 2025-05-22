@@ -1,0 +1,26 @@
+﻿@using PlantillaBlazor.Web.Components.Layout.Main
+@using PlantillaBlazor.Web.Components.Layout._404
+@using Microsoft.AspNetCore.Components.Authorization
+
+<CascadingAuthenticationState>
+    <Router AppAssembly="typeof(Program).Assembly">
+        <Found Context="routeData">
+            <CascadingValue Value="routeData" IsFixed=true>
+                <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)" >
+                    <NotAuthorized>
+                        <p>This is a secured page for logged in users only</p>
+                    </NotAuthorized>
+                </AuthorizeRouteView>
+            </CascadingValue>
+            <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        </Found>
+        <NotFound>
+            <PageTitle>Recurso no encontrado</PageTitle>
+            <LayoutView Layout="@typeof(Layout404)">
+                <_Page404></_Page404>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>
+
+

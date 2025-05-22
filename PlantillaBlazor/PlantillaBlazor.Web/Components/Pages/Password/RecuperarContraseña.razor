@@ -1,0 +1,126 @@
+﻿@using PlantillaBlazor.Domain.DTO.Perfilamiento
+@using PlantillaBlazor.Services.Interfaces.Perfilamiento
+@using PlantillaBlazor.Web.Components.Layout.Login
+
+@layout LoginLayout
+
+@page "/ReestablecerContraseña"
+
+@inject IUsuarioService _userService
+@inject ILogger<RecuperarContraseña> _logger;
+
+<PageTitle>Recuperación de Contraseña | Demo Blazor V2</PageTitle>
+
+@if (_isLoading)
+{
+    <_Loading></_Loading>
+}
+else
+{
+    <div class="p-lg-5 p-4">
+        <h5 class="text-primary">¿Olvidaste tu contraseña?</h5>
+        <p class="text-muted">Inicia el proceso de recuperación de contraseña</p>
+
+        <div class="alert border-0 alert-warning text-center mb-2 mx-2" role="alert">
+            Ingresa tu usuario y a continuación se enviarán las instrucciones para recuperar tu contraseña
+        </div>
+        <div class="p-2">
+            <EditForm Model="_model" OnValidSubmit="IniciarProcesoRecuperacionPass">
+                <DataAnnotationsValidator />
+                <AntiforgeryToken />
+                <div class="mb-4">
+                    <label class="form-label">Usuario</label>
+                    <input type="text" class="form-control" @bind-value="_model.NombreUsuario" id="usuario" placeholder="Ingresa tu usuario">
+                    <ValidationMessage class="text-validacion-error" For="() => _model.NombreUsuario" />
+                </div>
+
+                <div class="text-center mt-4">
+                    <_LoadingButton 
+                        Class="btn btn-info w-100"
+                        IsLoading="_isLoadingRecuperar"
+                        Texto="Continuar"
+                        Type="submit"
+                    />
+                </div>
+            </EditForm>           
+        </div>
+
+        <div class="mt-3 text-center">
+            <a href="/Login" class="fw-semibold text-primary text-decoration-underline"> Login </a>
+        </div>
+    </div>
+}
+
+@code {
+    bool _isLoading = true;
+    bool _isLoadingRecuperar = false;
+
+    private ReestablecerContraseñaModel _model = new();
+
+    protected override async Task OnAfterRenderAsync(bool firsRender)
+    {
+        try
+        {
+            if (firsRender)
+            {
+                _isLoading = false;
+                StateHasChanged();
+            }
+        }
+        catch (Exception exe)
+        {
+
+        }
+    }
+
+    private async void IniciarProcesoRecuperacionPass()
+    {
+        try
+        {
+            if (_isLoadingRecuperar) return;
+
+            await Task.Yield();
+            _isLoadingRecuperar = true;
+            StateHasChanged();
+
+            if (string.IsNullOrEmpty(_model.NombreUsuario))
+            {
+                _isLoadingRecuperar = false;
+                StateHasChanged();
+
+                await _jsRuntime.NotiflixReportAlert("Error", "Debe diligenciar el usuario", NotiflixMessageType.failure);
+                return;
+            }
+
+            var remoteIpAddress = await _jsRuntime.GetIpAddress();
+
+            var respuesta = await _userService.GestionarSolicitudRecuperacionContraseña(_model.NombreUsuario, remoteIpAddress,"Solicitud realizada por el usuario");
+
+            if (respuesta.IsSuccess)
+            {
+                await _jsRuntime.NotiflixReportAlertWithCallback("Correcto", "Hemos enviado un email al correo registrado para continuar con el proceso de recuperación de contraseña", NotiflixMessageType.success);
+
+                _navigationManager.NavigateTo("/");
+                
+                return;
+            }
+            else
+            {
+                _isLoadingRecuperar = false;
+                StateHasChanged();
+
+                await _jsRuntime.NotiflixReportAlertWithCallback("Error", respuesta.Error, NotiflixMessageType.failure);
+                return;
+            }
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, $"Error al generar solicitud de generación de contraseña para usuario {_model.NombreUsuario}");
+
+            await _jsRuntime.NotiflixNotifyAlert("Error interno del servidor", NotiflixMessageType.failure);
+        }
+
+        _isLoadingRecuperar = false;
+        StateHasChanged();
+    }
+}

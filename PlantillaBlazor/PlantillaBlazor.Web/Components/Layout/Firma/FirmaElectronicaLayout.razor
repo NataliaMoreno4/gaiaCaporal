@@ -1,0 +1,108 @@
+﻿@inherits LayoutComponentBase
+
+<HeadContent>
+    <link rel="stylesheet" media="all" href="assetsFirma\css\bootstrap.min.css">
+    <link rel="stylesheet" media="all" href="assetsFirma\css\style.css">
+    <link rel="stylesheet" media="all" href="assetsFirma\css\fontawesome-all.min.css">
+    <link rel="stylesheet" media="all" href="assetsFirma\css\jquery-ui.css">
+    <link rel="stylesheet" media="all" href="assetsFirma\css\fa-brands.min.css">
+    <link rel="stylesheet" media="all" href="assetsFirma\css\fa-regular.min.css">
+    <link rel="stylesheet" media="all" href="assetsFirma\css\fa-solid.min.css">
+    <link rel="stylesheet" media="all" href="assetsFirma\css\style.css">
+    <link rel="stylesheet" media="all" href="assetsFirma\css\css.css">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif !important;
+        }
+
+        textarea {
+            font-family: "Courier New" !important;
+        }
+
+        .sello {
+            width: 20% !important;
+            height: 20% !important;
+            float: left !important;
+            display: none !important;
+        }
+
+        .page-wrapper:after {
+            display: none !important;
+        }
+
+        #sign-draw {
+            width: auto !important;
+        }
+
+        #upload-image {
+            width: auto !important;
+        }
+
+        #sign-label {
+            width: auto !important;
+        }
+
+        @@media (min-width: 768px) {
+            .navbar {
+                border-radius: 0px !important;
+            }
+        }
+
+        .navbar {
+            border-radius: 0px !important;
+            margin: 0px !important;
+        }
+
+        .navbar-light {
+            background-color: #083381 !important
+        }
+
+        .navbar-brand {
+            height: 80px !important;
+        }
+    </style>
+</HeadContent>
+
+<_LoadingSpinner></_LoadingSpinner>
+
+<PageTitle>Firma Electrónica de Documento</PageTitle>
+
+<header>
+    <nav class="navbar navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-brand logo text-dark ml-2 mb-6" href="javascript:void(0)">
+                <img src="images/logo-white.png" style="height:70px" loading="lazy">
+            </a>
+        </div>
+    </nav>
+</header>
+
+@Body
+    
+<div class="container-fluid">
+        
+    
+</div>
+
+@code {
+    private string Anio = DateTime.Now.Year.ToString();
+
+    protected override async Task OnAfterRenderAsync(bool firsRender)
+    {
+        try
+        {
+            if (firsRender)
+            {
+
+            }
+
+            //Loader
+            await _jsRuntime.InvokeVoidAsync("agregarClase", ".loaderOverlay", "inactive");
+        }
+        catch (Exception exe)
+        {
+            
+        }
+    }
+}

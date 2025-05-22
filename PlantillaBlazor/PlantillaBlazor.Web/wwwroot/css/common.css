@@ -1,0 +1,176 @@
+﻿html {
+    height: 100% !important;
+}
+
+body {
+    height: 100% !important;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.toast-warning {
+    background-color: rgb(248, 148, 6) !important;
+}
+
+.toast-success {
+    background-color: rgb(81, 163, 81) !important;
+}
+
+.toast-error {
+    background-color: rgb(189, 54, 47) !important;
+}
+
+.grecaptcha-badge {
+    z-index: 10000;
+}
+
+#reconnect-modal {
+    display: none;
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    z-index: 1000 !important;
+    overflow: hidden;
+    background-color: rgb(255, 255, 255);
+    opacity: 0.8;
+    text-align: center;
+    font-weight: bold;
+    z-index: 10000;
+    color: black !important;
+}
+
+.div-estado {
+    width: 30px;
+    height: 30px;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%
+}
+
+.div-exitoso {
+    background: green;
+}
+
+.div-error {
+    background: red;
+}
+
+.text-validacion-error {
+    color: #f34343;
+    font-weight: 500;
+    font-size: 13px
+}
+
+.form-group:has(>.text-validacion-error) .form-control {
+    border-color: #f06e7a !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23fa5c7c' viewBox='-2 -2 7 7'%3e%3cpath stroke='%23fa5c7c' d='M0 0l3 3m0-3L0 3'/%3e%3ccircle r='.5'/%3e%3ccircle cx='3' r='.5'/%3e%3ccircle cy='3' r='.5'/%3e%3ccircle cx='3' cy='3' r='.5'/%3e%3c/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center right calc(0.375em + 0.1875rem);
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+    .form-group:has(>.text-validacion-error) .form-control:focus {
+        border-color: #f06e7a !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+
+.form-group {
+    padding: 0 0.1rem;
+}
+
+.validation-errors {
+    margin: 2rem;
+    padding: .5rem 2rem 2rem 2rem;
+    max-height: 300px;
+    overflow: auto;
+    color: #f34343;
+}
+
+    .validation-errors:before {
+        content: "Errores presentados, revise el formulario";
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-top: 10px;
+    }
+
+.validation-message {
+    padding: .2rem;
+    outline: 2px solid #f34343;
+    border-radius: 10px;
+    background: #ffece3;
+    margin: 10px 0px;
+}
+
+.table th {
+    color: white !important;
+    background: #ADADAD !important;
+}
+
+    .table th span {
+        color: white !important;
+    }
+
+    .table th div span {
+        color: white !important;
+    }
+
+.table tr:nth-of-type(2n) {
+    background: #f3f3f3 !important;
+}
+
+.table-responsive {
+    max-height: 800px !important;
+    overflow-y: auto !important;
+}
+
+@media (max-width: 1200px) {
+    .table th {
+        display: none;
+    }
+
+    .table td {
+        display: grid;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+    }
+
+        .table td:first-child {
+            padding-top: 2rem;
+        }
+
+        .table td:last-child {
+            padding-bottom: 2rem;
+        }
+
+        .table td::before {
+            content: attr(data-cell) ": ";
+            font-weight: 700;
+            text-transform: capitalize;
+        }
+
+    td {
+        text-align: center;
+        justify-content: center;
+        justify-items: center;
+    }
+}
+
+.table-responsive {
+    width: 100% !important;
+}
+
+.rz-dropdown-panel.rz-popup {
+    z-index: 20000 !important;
+}

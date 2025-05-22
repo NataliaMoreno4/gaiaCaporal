@@ -1,0 +1,319 @@
+﻿@attribute [PageInfo(IdModulo = 3)]
+
+@page "/ConsultaProductos"
+@using PlantillaBlazor.Domain.Entities.GaiaCaporal
+@using PlantillaBlazor.Domain.Entities.Parametrizacion
+@using PlantillaBlazor.Domain.Entities.Perfilamiento
+@using PlantillaBlazor.Services.Interfaces.GaiaCaporal
+@using PlantillaBlazor.Services.Interfaces.Parametrizacion
+@using PlantillaBlazor.Services.Interfaces.Perfilamiento
+
+@inject IRolService _rolService
+@inject IUsuarioService _userService
+@inject IGaiaCaporalService _gaiaCaporalService
+@inject IParametroGeneralService _parametroGeneralService
+@inject ILogger<ConsultaProductos> _logger
+
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">Productos</h4>
+
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Productos</a></li>
+                </ol>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">Consulta de productos</h4>
+            </div>
+            <div class="card-body">
+                <div class="flex" style="justify-content: space-evenly">
+                    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Agregar nuevo producto" Click="@InsertRow" Disabled=@(_productoToInsert != null || _productoToUpdate != null) />
+
+                </div>
+
+                <RadzenDataGridApp AllowVirtualization="false"
+                                   @ref="_productosGrid"
+                                   Data="@_productos"
+                                   TItem="Producto"
+                                   IsLoading="@_isLoading"
+                                   EditMode="DataGridEditMode.Single"
+                                   RowUpdate="@OnUpdateRow"
+                                   RowCreate="@OnCreateRow"
+                                   Sort="@Reset"
+                                   Page="@Reset"
+                                   Filter="@Reset">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="Producto" Frozen="true" Filterable="false" Sortable="false" TextAlign="TextAlign.Center">
+                            <Template Context="producto">
+                                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(producto))" @onclick:stopPropagation="true">
+                                </RadzenButton>
+                            </Template>
+                            <EditTemplate Context="producto">
+                                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(producto))">
+                                </RadzenButton>
+                                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(producto))">
+                                </RadzenButton>
+                            </EditTemplate>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Producto" Width="140px" Property="FechaAdicion" Title="Fecha de Adición">
+                            <EditTemplate Context="producto">
+                                <div style="text-align:center">
+                                    @("-")
+                                </div>
+                            </EditTemplate>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Producto" Property="NombreProducto" Title="Producto">
+                            <EditTemplate Context="producto">
+                                @if (_productoToUpdate is null)
+                                {
+                                        <input type="text" class="form-control" @bind-value="producto.NombreProducto" placeholder="Nombre del Producto" />
+                                }
+                                else
+                                {
+                                    @producto.NombreProducto
+                                }
+                            </EditTemplate>
+                            <Template Context="producto">
+                                @producto.NombreProducto
+                            </Template>
+                        </RadzenDataGridColumn>
+                        
+                        <RadzenDataGridColumn TItem="Producto" Property="Descripcion" Title="Descripción">
+                            <EditTemplate Context="producto">
+                                <input type="text" class="form-control" @bind-value="producto.Descripcion" placeholder="Descripción" />
+                            </EditTemplate>
+                            <Template Context="producto">
+                                @producto.Descripcion
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Producto" Property="IdCategoria" Title="Categoría" Type="typeof(IEnumerable<long>)"
+                                              FilterValue="@_selectedCategoriaIds" FilterOperator="FilterOperator.Contains" LogicalFilterOperator="LogicalFilterOperator.Or">
+                            <FilterTemplate>
+                                <RadzenCustomDropDown @bind-Value=@_selectedCategoriaIds Change=@OnselectedCategoriasIdsChange Data="@(_categorias)" AllowClear="true" ValueProperty="Id" TextProperty="Nombre" Multiple="true" />
+                            </FilterTemplate>
+                            <EditTemplate Context="producto">
+                                <RadzenCustomDropDown AllowClear="false" TValue="long" class="form-control" Placeholder="[Seleccionar]" @bind-value="producto.IdCategoria" Data=@_categorias TextProperty="Nombre" ValueProperty="Id" />
+                            </EditTemplate>
+                            <Template Context="producto">
+                                @producto.Categoria?.Nombre
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Producto" Property="IdMercado" Title="Mercado" Type="typeof(IEnumerable<long>)"
+                                              FilterValue="@_selectedMercadoIds" FilterOperator="FilterOperator.Contains" LogicalFilterOperator="LogicalFilterOperator.Or">
+                            <FilterTemplate>
+                                <RadzenCustomDropDown @bind-Value=@_selectedMercadoIds Change=@OnselectedMercadosIdsChange Data="@(_mercados)" AllowClear="true" ValueProperty="Id" TextProperty="Nombres" Multiple="true" />
+                            </FilterTemplate>
+                            <EditTemplate Context="producto">
+                                <RadzenCustomDropDown AllowClear="false" TValue="long" class="form-control" Placeholder="[Seleccionar]" @bind-value="producto.IdMercado" Data=@_mercados TextProperty="Nombres" ValueProperty="Id" />
+                            </EditTemplate>
+                            <Template Context="producto">
+                                @producto.Mercado?.Nombres
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGridApp>
+            </div>
+            <!-- end card body -->
+        </div>
+        <!-- end card -->
+    </div>
+    <!-- end col -->
+</div>
+
+
+@code {
+    private bool _isLoading = true;
+
+    private RadzenDataGrid<Producto> _productosGrid;
+
+    [CascadingParameter]
+    protected UserSession? UserSession { get; set; }
+
+    private IEnumerable<Usuario> _mercados;
+    private IEnumerable<Producto> _productos;
+
+    private ParametroGeneral _categorias;
+    private Producto _productoToInsert;
+    private Producto _productoToUpdate;
+
+    private IEnumerable<long> _selectedCategoriaIds;
+    private IEnumerable<long> _selectedMercadoIds;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (firstRender)
+            {
+                await LoadData();
+            }
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, "Error al consultar usuarios");
+            await _jsRuntime.NotiflixNotifyAlert("Error interno del servidor", NotiflixMessageType.failure);
+        }
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        await Task.Yield();
+
+        var tCategorias = _parametroGeneralService.ConsultarParametroGeneralById(2);
+        var tMercados = _userService.GetUsuarios();
+        var tProductos = _gaiaCaporalService.GetProductos();
+
+        await Task.WhenAll(tCategorias,tMercados, tProductos);
+
+        _categorias = await tCategorias;
+        _productos = await tProductos;
+        _mercados = await tMercados;
+
+        _productos = _productos.OrderByDescending(u => u.FechaAdicion);
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+
+    void Reset()
+    {
+        _productoToInsert = null;
+        _productoToUpdate = null;
+    }
+
+
+    async Task EditRow(Producto producto)
+    {
+        _productoToUpdate = producto;
+        await _productosGrid.EditRow(producto);
+    }
+
+    private async Task OnUpdateRow(Producto producto)
+    {
+        try
+        {
+            if (producto == _productoToInsert)
+            {
+                _productoToInsert = null;
+            }
+
+            _productoToUpdate = null;
+
+            await _jsRuntime.NotiflixLoading(NotiflixLoadingType.hourglass, "Procesando");
+
+            string ipAddress = await _jsRuntime.GetIpAddress();
+
+            producto.IdUsuarioUltimaActualizacion = UserSession.IdUsuario;
+
+            var respuesta = await _gaiaCaporalService.InsertarProducto(producto);
+
+            await _jsRuntime.NotiflixRemoveLoading();
+
+            if (!respuesta.IsSuccess)
+            {
+                await _jsRuntime.NotiflixReportAlert("Error", respuesta.Error, NotiflixMessageType.failure);
+                return;
+            }
+
+            await _jsRuntime.NotiflixNotifyAlert("Información guardada correctamente", NotiflixMessageType.success);
+
+            await LoadData();
+        }
+        catch (Exception exe)
+        {
+            CancelEdit(producto);
+            _logger.LogError(exe, "Error al guardar información de usuario");
+            await _jsRuntime.NotiflixNotifyAlert("Error al realizar esta operación", NotiflixMessageType.failure);
+        }
+    }
+
+    async Task SaveRow(Producto producto)
+    {
+        await _productosGrid.UpdateRow(producto);
+    }
+
+    void CancelEdit(Producto producto)
+    {
+        _productoToInsert = null;
+        _productoToUpdate = null;
+
+        _productosGrid.CancelEditRow(producto);
+    }
+
+    async Task InsertRow()
+    {
+        _productoToInsert = new Producto();
+        await _productosGrid.InsertRow(_productoToInsert);
+    }
+
+    private async Task OnCreateRow(Producto producto)
+    {
+        try
+        {
+            if (producto == _productoToInsert)
+            {
+                _productoToInsert = null;
+            }
+
+            _productoToUpdate = null;
+
+            await _jsRuntime.NotiflixLoading(NotiflixLoadingType.hourglass, "Procesando");
+
+            string ipAddress = await _jsRuntime.GetIpAddress();
+
+            producto.IdUsuarioAdiciono = UserSession.IdUsuario;
+
+            var respuesta = await _gaiaCaporalService.InsertarProducto(producto);
+
+            await _jsRuntime.NotiflixRemoveLoading();
+
+            if (!respuesta.IsSuccess)
+            {
+                await _jsRuntime.NotiflixReportAlert("Error", respuesta.Error, NotiflixMessageType.failure);
+                return;
+            }
+
+            await LoadData();
+
+            await _jsRuntime.NotiflixNotifyAlert("Información guardada correctamente", NotiflixMessageType.success);
+        }
+        catch (Exception exe)
+        {
+            CancelEdit(producto);
+            _logger.LogError(exe, "Error al guardar información de producto");
+            await _jsRuntime.NotiflixNotifyAlert("Error al realizar esta operación", NotiflixMessageType.failure);
+        }
+    }
+
+
+
+    void OnselectedCategoriasIdsChange(object value)
+    {
+        if (_selectedCategoriaIds != null && !_selectedCategoriaIds.Any())
+        {
+            _selectedCategoriaIds = null;
+        }
+    }
+    void OnselectedMercadosIdsChange(object value)
+    {
+        if (_selectedMercadoIds != null && !_selectedMercadoIds.Any())
+        {
+            _selectedMercadoIds = null;
+        }
+    }
+}

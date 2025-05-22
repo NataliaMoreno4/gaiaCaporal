@@ -1,0 +1,42 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using PlantillaBlazor.Services.Interfaces.Auditoria
+@using PlantillaBlazor.Services.Interfaces.Email
+@using PlantillaBlazor.Services.Interfaces.Encrypt
+@using PlantillaBlazor.Services.Interfaces.Perfilamiento
+@using PlantillaBlazor.Web.Services.Authentication
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using Microsoft.AspNetCore.Components.Web
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+@using PlantillaBlazor.Web
+@using PlantillaBlazor.Web.Components
+@using PlantillaBlazor.Web.Components.Shared
+@using Radzen.Blazor
+@using Radzen
+@using static PlantillaBlazor.Web.Helpers.IJSRuntimeExtension
+@using static PlantillaBlazor.Web.Helpers.NotiflixJSExtension
+@using PlantillaBlazor.Web.Entities.Authorization
+@using PlantillaBlazor.Web.Services
+@using PlantillaBlazor.Domain.Common.ResultModels
+@using PlantillaBlazor.Web.Entities.Authentication
+@using PlantillaBlazor.Web.Utilidades
+@using PlantillaBlazor.Domain.Common
+@using PlantillaBlazor.Web.Helpers
+
+@inject IJSRuntime _jsRuntime
+@inject NavigationManager _navigationManager
+@inject IWebHostEnvironment env
+@inject AuthenticationStateProvider _authStateProvider
+@inject AuthService _authenticationService
+@inject IAuditoriaService _auditoriaService
+@inject IConfiguration _config
+@inject IEncryptService _encryptService
+@inject ProtectedSessionStorage _pSessionStorageService
+@inject ISessionService _sessionService
+@inject TooltipService _tooltipService
+@inject TooltipHelper _tooltipHelper

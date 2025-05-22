@@ -1,0 +1,143 @@
+﻿@import url("https://fonts.googleapis.com/css?family=Poppins:400,500,600");
+
+:root {
+    --rz-secondary: #695EEF !important;
+    --rz-secondary-light: #c3bff9 !important;
+    --rz-secondary-dark: #2b1be8 !important;
+    --rz-primary: #695EEF !important;
+    --rz-primary-light: #c3bff9 !important;
+    --rz-primary-lighter: #e1dffc;
+    --rz-primary-dark: #2b1be8 !important;
+    --rz-primary-darker: #0a063d !important;
+    /*    --rz-grid-cell-font-size: .9375rem !important;
+    --rz-grid-header-font-size: 1rem !important;*/
+}
+
+.rz-button-md {
+    font-size: var(--rz-grid-header-font-size) !important;
+}
+
+.rz-column-title-content {
+    white-space: normal !important;
+    overflow: auto !important;
+    padding: 2px !important;
+}
+
+.rz-cell-data {
+    white-space: normal !important;
+    overflow: auto !important;
+    padding: 5px !important;
+    word-wrap: break-word !important;
+}
+
+.rz-multiselect-panel.rz-popup {
+    width: auto !important;
+    max-width: 500px !important;
+}
+
+.rz-dropdown-panel.rz-popup {
+    width: auto !important;
+    max-width: 500px !important;
+}
+
+.rz-multiselect-header {
+    font-size: 1rem !important;
+}
+
+.rz-button-xs.rz-button-icon-only, .rz-button-xs.rz-paginator-element {
+    padding: .1rem !important;
+}
+
+.rz-tooltip-content div {
+    max-width: 200px;
+    white-space: normal !important;
+    overflow: auto !important;
+    padding: 5px !important;
+    word-wrap: break-word !important;
+}
+
+.rz-steps .rz-menuitem-link {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.rz-steps-title {
+    margin: 0px;
+    color: #8B8787 !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+}
+
+.rz-steps .rz-steps-item:not(:last-child):after {
+    background-color: #8B8787 !important;
+    height: 4px !important;
+    margin-left: 16px !important;
+    margin-right: 16px !important;
+}
+
+.rz-steps-item:not(.rz-steps-current) .rz-steps-number {
+    border-color: #8B8787 !important;
+    border: 2px solid !important;
+    color: #8B8787 !important;
+    font-weight: 600 !important;
+}
+
+.rz-steps-number {
+    height: 3rem !important;
+    width: 3rem !important;
+    font-size: 1.5rem !important;
+}
+
+.rz-menuitem-link {
+    height: 100% !important;
+}
+
+.rz-menuitem-link {
+    max-width: 100px !important;
+}
+
+ul[role="tablist"] {
+    margin-left: 4rem !important;
+    margin-right: 4rem !important;
+}
+
+.rz-steps-current .rz-menuitem-link:before {
+    content: url("https://i.ibb.co/Pg1DkR4/Vector-298.png");
+    height: 20px !important;
+    transform: scale(0.5);
+}
+
+.rz-steps-item:not(.rz-steps-current) .rz-menuitem-link:before {
+    content: '';
+    height: 20px !important;
+}
+
+@media (max-width: 700px) {
+    ul[role="tablist"] {
+        margin-left: 0px !important;
+        margin-right: 0px !important;
+        align-items: center !important;
+    }
+
+    .rz-steps .rz-steps-item:not(:last-child):after {
+        content: none;
+    }
+}
+
+.rz-steps-title {
+    margin: 0px !important;
+}
+
+.rz-widget-content {
+    margin-top: 15px !important;
+}
+
+.rz-chkbox-box:hover:not(.rz-state-disabled):after {
+    width: 1rem !important;
+    height: 1rem !important;
+}
+
+.rz-column-title-content:has(.rz-chkbox) {
+    overflow: hidden !important; 
+}
+

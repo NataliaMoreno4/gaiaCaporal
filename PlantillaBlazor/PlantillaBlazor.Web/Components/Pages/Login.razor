@@ -1,0 +1,411 @@
+﻿@using PlantillaBlazor.Domain.Enums
+@using PlantillaBlazor.Services.Interfaces.Perfilamiento
+@using PlantillaBlazor.Domain.DTO.Perfilamiento
+@using PlantillaBlazor.Domain.Entities.Perfilamiento
+@using PlantillaBlazor.Web.Components.Layout.Login
+
+@page "/"
+@page "/login"
+
+@layout LoginLayout
+
+@inject IUsuarioService _usuarioService
+@inject IConfiguration _config
+@inject GooglereCaptchaService _googlereCaptchaService
+@inject ILogger<Login> _logger
+
+<PageTitle>Login | Demo Blazor V2</PageTitle>
+
+@if (_isLoading)
+{
+    <_Loading></_Loading>
+}
+else
+{
+    <div class="p-lg-5 p-4">
+        <div>
+            <h5 class="text-primary">Bienvenido !</h5>
+            <p class="text-muted">Ingresa tus credenciales para continuar.</p>
+        </div>
+
+        <div class="mt-4">
+            <EditForm Model="_usuario" class="form-pass" OnValidSubmit="Ingresar">
+                <DataAnnotationsValidator />
+                <AntiforgeryToken />
+                <div class="mb-3">
+                    <div class="form-group">
+                        <label for="username" class="form-label">Usuario</label>
+                        <input type="text" @bind-value="_usuario.Usuario" class="form-control" id="username" placeholder="Ingresa tu usuario">
+                        <ValidationMessage For="() => _usuario.Usuario" class="text-validacion-error" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="float-end">
+                        <a href="/ReestablecerContraseña" class="text-muted">¿Olvidaste tu contraseña?</a>
+                    </div>
+
+                    <label class="form-label" for="password-input">Contraseña</label>
+                    <div class="position-relative auth-pass-inputgroup mb-3">
+                        <div class="form-group">
+                            <_PasswordField @bind-BindingValue="_usuario.Password" Class="form-control" />
+                            <ValidationMessage For="() => _usuario.Password" class="text-validacion-error" />
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="__RequestVerificationToken" value="@_antiforgeryToken" />
+                <div class="form-check">
+                    <RadzenCheckBox @bind-Value=@_rememberMe Name="chkRememberMe" TValue="bool" />
+                    <RadzenLabel Text="Recuerda mis datos" Component="chkRememberMe" Style="margin-left: 8px; vertical-align: middle;" />
+                </div>
+                <div class="mt-4">
+                    <_LoadingButton Class="btn btn-info w-100"
+                                    IsLoading="_isLoadingLogin"
+                                    Texto="Ingresar"
+                                    Type="submit" />
+                </div>
+                @if (_oauthEnabled)
+                {
+                    <div class="mt-4 text-center">
+                        <div class="signin-other-title">
+                            <h5 class="fs-13 mb-4 title">Iniciar sesión con</h5>
+                        </div>
+
+                        <a href="api/account/login" class="btn btn-id-excellentiam">
+                            <img src="images/logo.png" width="200" />
+                        </a>
+                    </div>
+                }
+            </EditForm>
+        </div>
+    </div>
+}
+
+
+@code {
+    private string _antiforgeryToken;
+
+    private bool _isLoading = true;
+    private bool _isLoadingLogin = false;
+    private bool _oauthEnabled = false;
+
+    private string _captchaToken = "";
+    public GoogleREspo googleREspo = new GoogleREspo();
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    private bool _rememberMe = false;
+
+    private UserDTO _usuario = new UserDTO();
+
+    private class TokenResponse
+    {
+        public string Token { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (await ValidarRememberMe())
+            {
+                return;
+            }
+
+            var httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri(_navigationManager.BaseUri);
+            var response = await httpClient.GetAsync("api/AntiForgery/token");
+            if (response.IsSuccessStatusCode)
+            {
+                var tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>();
+                _antiforgeryToken = tokenResponse?.Token;
+            }
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, "Error al inicializar pantalla de login");
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firsRender)
+    {
+        try
+        {
+            if (firsRender)
+            {
+                _oauthEnabled = _config.GetSection("OpenIDConnectSettings").GetValue<bool>("Enabled");
+
+                _isLoading = false;
+                StateHasChanged();
+
+                await _jsRuntime.LoadJSScript("https://www.google.com/recaptcha/api.js?render=6LdSzOIUAAAAALm0JDVCho1mJWvnP9bLsajJvC8M");
+
+                StateHasChanged();
+            }
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, "Error al cargar datos de login");
+            await _jsRuntime.NotiflixNotifyAlert("Error interno del servidor", NotiflixMessageType.failure);
+        }
+    }
+
+    private async Task<bool> ValidarRememberMe()
+    {
+        if (authenticationState is null) return false;
+
+        var authState = await authenticationState;
+        var user = authState?.User;
+
+        if (user?.Identity is null || !user.Identity.IsAuthenticated)
+        {
+            return false;
+        }
+
+        UserSession userSession = UserSession.GetUserSessionFromClaims(user.Claims);
+
+        if (userSession is null) return false;
+
+        var ipAddress = await _jsRuntime.GetIpAddress();
+
+        var session = await _sessionService.GetSessionById(long.Parse(userSession.IdSession));
+
+        if (session is null) return false;
+
+        long idAuditoria = 0;
+
+        if (!long.TryParse(userSession.IdAuditoriaLogin, out idAuditoria))
+        {
+            return false;
+        }
+
+        //Sesión inactivada
+        if (!session.IsActive)
+        {
+            string motivo = $"La sesión con ID {session.Id} se vence ya que ha sido desactivada";
+            await _usuarioService.RegistrarAuditoriaCierreSesion(idAuditoria, ipAddress, motivo);
+
+            await CloseSession();
+            return false;
+        }
+
+        //La sesión se vence si han pasado más de 2 días desde último login
+        if ((DateTime.Now - session.FechaUltimoIngreso!.Value).TotalDays > 2)
+        {
+            string motivo = $"La sesión se vence ya que han han pasado más de 2 días desde último login {session.FechaUltimoIngreso.GetValueOrDefault()}";
+            await _usuarioService.RegistrarAuditoriaCierreSesion(idAuditoria, ipAddress, motivo);
+
+            await CloseSession();
+            return false;
+        }
+
+        string urlActual = _navigationManager.BaseUri;
+        urlActual = urlActual.Remove(urlActual.Length - 1);
+
+        urlActual = urlActual.Replace("https://", "");
+        urlActual = urlActual.Replace("http://", "");
+
+        string urlCookie = userSession.Url;
+        urlCookie = urlCookie.Replace("https://", "");
+        urlCookie = urlCookie.Replace("http://", "");
+
+        if (!urlActual.Equals(urlCookie))
+        {
+            string motivo = $"La sesión se cierra ya que existe un conflicto de cookies con otro sitio web (URL ACTUAL:{urlActual}/ URL DE LA COOKIE: {userSession.Url}-{session.Host})";
+            await _usuarioService.RegistrarAuditoriaCierreSesion(idAuditoria, ipAddress, motivo);
+
+            await CloseSession();
+            return false;
+        }
+
+        Usuario tempUser = await _usuarioService.GetUsuarioById(userSession.IdUsuario);
+
+        if (tempUser is null)
+        {
+            await CloseSession();
+            return false;
+        }
+
+        //Usuario inactivo
+        if (!tempUser.IsActive)
+        {
+            string motivo = $"La sesión se vence ya que se ha inactivado el usuario";
+            await _usuarioService.RegistrarAuditoriaCierreSesion(idAuditoria, ipAddress, motivo);
+
+            await CloseSession();
+            return false;
+        }
+
+        //Debe cambiar la contraseña
+        if (tempUser.MustChangePassword)
+        {
+            await _usuarioService.RegistrarAuditoriaCierreSesion(idAuditoria, ipAddress, $"La sesión se vence ya que se indicó que el usuario debe cambiar la contraseña en su próximo ingreso");
+
+            await CloseSession();
+            return false;
+        }
+
+        bool rememberMe = userSession.RememberMe;
+
+        if (rememberMe)
+        {
+            if (tempUser.TipoUsuario!.Equals("OAuth") && string.IsNullOrEmpty(tempUser.Email))
+            {
+                _navigationManager.NavigateTo("/signin-oidc");
+                return false;
+            }
+
+            _navigationManager.NavigateTo("/Home", true);
+
+            return true;
+        }
+        else
+        {
+            string motivo = $"La sesión se vence ya que el usuario ha vuelto a la página de login";
+            await _usuarioService.RegistrarAuditoriaCierreSesion(idAuditoria, ipAddress, motivo);
+
+            await CloseSession();
+            return false;
+        }
+    }
+
+    private async Task CloseSession()
+    {
+        try
+        {
+            if (authenticationState is null) return;
+
+            var authState = await authenticationState;
+            var user = authState?.User;
+
+            if (user?.Identity is null || !user.Identity.IsAuthenticated)
+            {
+                return;
+            }
+
+            UserSession userSession = UserSession.GetUserSessionFromClaims(user.Claims);
+
+            string tipoUsuario = userSession.TipoUsuario;
+
+            if (tipoUsuario.Equals("Normal"))
+            {
+                _navigationManager.NavigateTo("/auth/logout", forceLoad: true);
+                return;
+            }
+            else if (tipoUsuario.Equals("OAuth"))
+            {
+                _navigationManager.NavigateTo("/api/account/logout", forceLoad: true);
+                return;
+            }
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, "Error al cerrar sesión");
+        }
+
+        _navigationManager.NavigateTo("/auth/logout", forceLoad: true);
+    }
+
+    private async Task Ingresar()
+    {
+        try
+        {
+            if (_isLoadingLogin) return;
+
+            _isLoadingLogin = true;
+            StateHasChanged();
+            await Task.Yield();
+
+            _captchaToken = await _jsRuntime.InvokeAsync<string>("runCaptcha");
+            googleREspo = await _googlereCaptchaService.reVerify(_captchaToken);
+
+            if (!googleREspo.success)
+            {
+                _isLoadingLogin = false;
+                StateHasChanged();
+
+                await _jsRuntime.NotiflixNotifyAlert("Autenticación de recaptcha fallida", NotiflixMessageType.failure);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(_usuario.Usuario))
+            {
+                _isLoadingLogin = false;
+                StateHasChanged();
+
+                await _jsRuntime.NotiflixNotifyAlert("Debe diligenciar el usuario", NotiflixMessageType.failure);
+
+                return;
+            }
+
+            if (string.IsNullOrEmpty(_usuario.Password))
+            {
+                _isLoadingLogin = false;
+                StateHasChanged();
+
+                await _jsRuntime.NotiflixNotifyAlert("Debe diligenciar la contraseña", NotiflixMessageType.failure);
+                return;
+            }
+
+            var remoteIpAddress = await _jsRuntime.GetIpAddress();
+
+            var respuesta = await _usuarioService.ProcesarLoginUsuario(_usuario, remoteIpAddress);
+
+            if (respuesta.IsSuccess)
+            {
+                if (respuesta.RespuestaLogin == TipoRespuestaLogin.EXITOSA)
+                {
+                    Usuario user = await _usuarioService.GetUsuarioByUser(_usuario.Usuario);
+
+                    Dictionary<string, string> parametros = new Dictionary<string, string>()
+                    {
+                        {"idusuario",user.Id.ToString()},
+                        {"rememberme", _rememberMe.ToString()},
+                        {"idauditorialogin",respuesta.Value.ToString()}
+                    };
+
+                    string parametroEncriptado = _encryptService.EncriptarParametros(parametros);
+
+                    _navigationManager.NavigateTo($"/OtpLogin/{parametroEncriptado}", forceLoad: true);
+                }
+                else if (respuesta.RespuestaLogin == TipoRespuestaLogin.CAMBIO_CONTRASEÑA)
+                {
+                    Usuario user = await _usuarioService.GetUsuarioByUser(_usuario.Usuario);
+
+                    Dictionary<string, string> parametros = new Dictionary<string, string>()
+                    {
+                        {"idusuario",user.Id.ToString()},
+                        {"rememberme", _rememberMe.ToString()},
+                        {"idauditorialogin",respuesta.Value.ToString()}
+                    };
+
+                    string parametroEncriptado = _encryptService.EncriptarParametros(parametros);
+
+                    await _jsRuntime.NotiflixReportAlertWithCallback("Advertencia", "Debido a políticas de seguridad debes realizar el cambio de tu contraseña", NotiflixMessageType.info);
+
+                    _navigationManager.NavigateTo($"/OtpPass/{parametroEncriptado}");
+
+                    return;
+                }
+            }
+            else
+            {
+                _isLoadingLogin = false;
+                StateHasChanged();
+
+                await _jsRuntime.NotiflixReportAlert("Error", respuesta.Error, NotiflixMessageType.failure);
+                return;
+            }
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, $"Error al realizar login para usuario {_usuario.Usuario}");
+
+            await _jsRuntime.NotiflixNotifyAlert("Error interno del servidor", NotiflixMessageType.failure);
+        }
+
+        _isLoadingLogin = false;
+        StateHasChanged();
+    }
+}

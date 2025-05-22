@@ -1,0 +1,33 @@
+﻿@if (IsLoading)
+{
+    <button class="@Class" type="@Type" disabled>
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        @TextoCargando...
+    </button>
+}
+else
+{
+    <button class="@Class" @onclick="OnClicked" type="@Type">
+        @Texto
+    </button>
+}
+
+@code {
+    [Parameter]
+    public bool IsLoading { get; set; } = false;
+
+    [Parameter]
+    public string Texto { get; set; } = "";
+
+    [Parameter]
+    public string TextoCargando { get; set; } = "Procesando";
+
+    [Parameter]
+    public string Class { get; set; } = "";
+
+    [Parameter]
+    public string Type { get; set; } = "";
+
+    [Parameter]
+    public EventCallback OnClicked { get; set; }
+}

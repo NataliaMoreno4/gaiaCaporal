@@ -1,0 +1,106 @@
+﻿@inject ILogger<_ModalComponent> _logger
+
+<style>
+    @@media (min-width: 576px){
+        #@IdModal .modal-dialog{
+            max-width: @(Width)px !important;
+        }
+    }
+</style>
+
+<div id="@IdModal" class="modal fade show" tabindex="-1" aria-labelledby="myModalLabel" aria-modal="true" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@Titulo</h5>
+                <button type="button" class="btn-close" @onclick="CerrarModal" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @if (IsLoading)
+                {
+                    <_Loading></_Loading>
+                }
+                else {
+                    @if (CuerpoModal != null)
+                    {
+                        @CuerpoModal
+                    }
+                    else
+                    {
+                        <span>Nada que mostrar</span>
+                    }
+                }
+            </div>
+            <div class="modal-footer">
+                @if(FooterModal is null)
+                {
+                    <button type="button" class="btn btn-light" @onclick="CerrarModal" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" @onclick="EventoAceptar">Aceptar</button>
+                }
+                else
+                {
+                    @FooterModal
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// Identificador único del modal
+    /// </summary>
+    private string IdModal = "";
+    /// <summary>
+    /// Indica si el modal debe mostrar animación de cargando
+    /// </summary>
+    [Parameter]
+    public bool IsLoading { get; set; } = true;
+    /// <summary>
+    /// Título que tendrá el modal
+    /// </summary>
+    [Parameter]
+    public string Titulo { get; set; } = "";
+    /// <summary>
+    /// Cuerpo HTML del modal
+    /// </summary>
+    [Parameter]
+    public RenderFragment CuerpoModal { get; set; }
+    /// <summary>
+    /// Contenido en HTML del footer del modal
+    /// </summary>
+    [Parameter]
+    public RenderFragment FooterModal { get; set; }
+    /// <summary>
+    /// Evento que se ejecutará al hacer click en el botón aceptar por defecto del modal
+    /// </summary>
+    [Parameter]
+    public EventCallback EventoAceptar { get; set; }
+    /// <summary>
+    /// Ancho que tendrá el modal
+    /// </summary>
+    [Parameter]
+    public int Width { get; set; } = 1000;
+
+    protected override void OnInitialized()
+    {
+        IdModal = "modal"+Guid.NewGuid().ToString("N");
+        base.OnInitialized();
+    }
+    /// <summary>
+    /// Método que hará visible el modal en pantalla
+    /// </summary>
+    /// <returns></returns>
+    public async Task AbrirModal()
+    {
+        await _jsRuntime.InvokeVoidAsync("OpenModal", $"#{IdModal}");
+    }
+    /// <summary>
+    /// Método para cerrar u ocultar el modal
+    /// </summary>
+    /// <returns></returns>
+    public async Task CerrarModal()
+    {
+        await _jsRuntime.InvokeVoidAsync("CloseModal", $"#{IdModal}");
+    }
+}

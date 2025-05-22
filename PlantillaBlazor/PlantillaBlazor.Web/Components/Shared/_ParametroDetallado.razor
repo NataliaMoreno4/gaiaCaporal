@@ -1,0 +1,18 @@
+﻿@using PlantillaBlazor.Domain.Entities.Parametrizacion
+
+<tr>
+    <td data-cell="#" style="text-align:center" class="fw-medium">@Consecutivo</td>
+    <td data-cell="Nombre"><input class="form-control" placeholder="Nombre" type="text" @bind-value="pDetallado.Nombre" /></td>
+    <td data-cell="Eliminar" style="text-align:center"><RadzenButton ButtonStyle="ButtonStyle.Primary" Icon="delete" Class="m-1" Click="EventoEliminarPDetallado" /></td>
+</tr>
+
+@code {
+    [Parameter]
+    public ParametroDetallado pDetallado { get; set; } = new ParametroDetallado();
+
+    [Parameter]
+    public int Consecutivo { get; set; } = 0;
+
+    [Parameter]
+    public EventCallback EventoEliminarPDetallado { get; set; }
+}

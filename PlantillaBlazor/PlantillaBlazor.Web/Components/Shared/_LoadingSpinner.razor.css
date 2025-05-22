@@ -1,0 +1,16 @@
+﻿
+.text-wrapper {
+    background: linear-gradient(90deg, #103F83 5.75%, #3F97EF 91.84%);
+    -webkit-background-clip: text !important;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-fill-color: transparent;
+    font-family: "Poppins", Helvetica !important;
+    font-weight: 600;
+    color: transparent;
+    font-size: 35px;
+    text-align: center;
+    letter-spacing: 0;
+    line-height: 47.9px;
+    white-space: normal;
+}

@@ -1,0 +1,163 @@
+﻿@inject ILogger<NavMenu> _logger
+
+
+
+@if (_isLoading)
+{
+    <_Loading></_Loading>
+}
+else
+{
+    <div id="scrollbar" data-simplebar="init" class="h-100 simplebar-scrollable-y">
+        <div class="simplebar-wrapper" style="margin: 0px;">
+            <div class="simplebar-height-auto-observer-wrapper">
+                <div class="simplebar-height-auto-observer"></div>
+            </div>
+            <div class="simplebar-mask">
+                <div class="simplebar-offset" style="right: 0px; bottom: 0px;">
+                    <div class="simplebar-content-wrapper" tabindex="0" role="region" aria-label="scrollable content"
+                         style="height: 100%; overflow: hidden scroll;">
+                        <div class="simplebar-content" style="padding: 0px;">
+                            <div class="container-fluid">
+                                <div id="two-column-menu"></div>
+                                <ul class="navbar-nav" id="navbar-nav" data-simplebar="init">
+                                    <div class="simplebar-wrapper" style="margin: 0px;">
+                                        <div class="simplebar-height-auto-observer-wrapper">
+                                            <div class="simplebar-height-auto-observer"></div>
+                                        </div>
+                                        <div class="simplebar-mask">
+                                            <div class="simplebar-offset" style="right: 0px; bottom: 0px;">
+                                                <div class="simplebar-content-wrapper" tabindex="0" role="region"
+                                                     aria-label="scrollable content" style="height: auto; overflow: auto;">
+                                                    <div class="simplebar-content" style="padding: 0px;">
+
+
+                                                        @* Configuracion *@
+                                                        <ModuleAuthorizationView IdModulo=1 >
+                                                            <Authorize>
+                                                                <li class="menu-title">
+                                                                    <span data-key="t-menu">Configuración</span>
+                                                                </li>
+
+                                                                @* Perfilamiento *@
+                                                                <ModuleAuthorizationView IdModulo=2 >
+                                                                    <Authorize>
+                                                                        <li class="nav-item">
+                                                                            <a class="nav-link menu-link"
+                                                                               href="#sidePerfilamiento"
+                                                                               data-bs-toggle="collapse" role="button"
+                                                                               aria-expanded="false"
+                                                                               aria-controls="sidebarDashboards">
+                                                                                <i class="ri-account-circle-line"></i> <span data-key="t-perfilamiento">Perfilamiento</span>
+                                                                            </a>
+                                                                            <div class="collapse menu-dropdown"
+                                                                                 id="sidePerfilamiento">
+                                                                                <ul class="nav nav-sm flex-column">
+                                                                                    @* Usuarios *@
+                                                                                    <ModuleAuthorizationView IdModulo=4 >
+                                                                                        <Authorize>
+                                                                                            <li class="nav-item">
+                                                                                                <a href="/Perfilamiento/ConsultaUsuarios"
+                                                                                                   class="nav-link"
+                                                                                                   data-key="t-analytics">
+                                                                                                    Usuarios
+                                                                                                </a>
+                                                                                            </li>
+                                                                                        </Authorize>
+                                                                                    </ModuleAuthorizationView>
+                                                                                    @* Roles *@
+                                                                                    <ModuleAuthorizationView IdModulo=5 >
+                                                                                        <Authorize>
+                                                                                            <li class="nav-item">
+                                                                                                <a href="/Perfilamiento/ConsultaRoles"
+                                                                                                   class="nav-link"
+                                                                                                   data-key="t-crm">
+                                                                                                    Roles
+                                                                                                </a>
+                                                                                            </li>
+                                                                                        </Authorize>
+                                                                                    </ModuleAuthorizationView>
+
+                                                                                </ul>
+                                                                            </div>
+                                                                        </li>
+                                                                    </Authorize>
+                                                                </ModuleAuthorizationView>
+                                                                @* Parametria *@
+                                                                <ModuleAuthorizationView IdModulo=6 >
+                                                                    <Authorize>
+                                                                        @* PARAMETRIA *@
+                                                                        <li class="nav-item">
+                                                                            <a class="nav-link menu-link"
+                                                                               href="/Parametrizacion/ConsultaParametroGeneral">
+                                                                                <i class="ri-honour-line"></i>
+                                                                                <span data-key="t-widgets">Parametrización</span>
+                                                                            </a>
+                                                                        </li>
+                                                                    </Authorize>
+                                                                </ModuleAuthorizationView>
+
+                                                            </Authorize>
+                                                        </ModuleAuthorizationView>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="simplebar-placeholder" style="width: 249px; height: 780px;">
+                </div>
+            </div>
+            <div class="simplebar-track simplebar-horizontal" style="visibility: hidden;">
+                <div class="simplebar-scrollbar" style="width: 0px; display: none;"></div>
+            </div>
+            <div class="simplebar-track simplebar-vertical" style="visibility: hidden;">
+                <div class="simplebar-scrollbar" style="height: 0px; display: none;"></div>
+            </div>
+            </ul>
+        </div>
+    </div>
+                    </div>
+                </div>
+            </div>
+    <div class="simplebar-placeholder" style="width: 249px; height: 1097px;"></div>
+        </div>
+    <div class="simplebar-track simplebar-horizontal" style="visibility: hidden;">
+        <div class="simplebar-scrollbar" style="width: 0px; display: none;"></div>
+    </div>
+    <div class="simplebar-track simplebar-vertical" style="visibility: visible;">
+        <div class="simplebar-scrollbar" style="height: 606px; transform: translate3d(0px, 0px, 0px); display: block;">
+        </div>
+    </div>
+    </div>
+}
+
+
+@code{
+    private bool _isLoading = false;
+
+    [CascadingParameter]
+    protected UserSession? UserSession { get; set; }
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _isLoading = true;
+            StateHasChanged();
+
+            _isLoading = false;
+            StateHasChanged();
+
+            await _jsRuntime.LoadJSScript("../assetsMainSite/libs/bootstrap/js/bootstrap.bundle.min.js");
+            await _jsRuntime.LoadJSScript("../assetsMainSite/libs/simplebar/simplebar.min.js");
+            await _jsRuntime.LoadJSScript("../assetsMainSite/libs/node-waves/waves.min.js");
+            await _jsRuntime.LoadJSScript("../assetsMainSite/libs/feather-icons/feather.min.js");
+            await _jsRuntime.LoadJSScript("../assetsMainSite/js/pages/plugins/lord-icon-2.1.0.js");
+
+            await _jsRuntime.LoadJSScript("../assetsMainSite/js/app.js");
+            await _jsRuntime.LoadJSScript("../assetsMainSite/js/responsive.js");
+
+            //Loader
+            await _jsRuntime.InvokeVoidAsync("agregarClase", ".loaderOverlay", "inactive");
+        }
+    }
+}

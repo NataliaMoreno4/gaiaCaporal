@@ -1,0 +1,198 @@
+﻿@using PlantillaBlazor.Services.Interfaces.Perfilamiento
+@using PlantillaBlazor.Domain.DTO.OTP
+@using PlantillaBlazor.Domain.Entities.Perfilamiento
+@using PlantillaBlazor.Web.Components.Layout.Login
+
+@layout LoginLayout
+
+@page "/OtpPass/{ParametrosEncriptados}"
+
+@inject IUsuarioService _userService
+@inject ILogger<OtpCambioPass> _logger;
+
+<PageTitle>Cambio de contraseña | Demo Blazor V2</PageTitle>
+
+<div class="p-lg-5 p-4">
+    <div class="mb-4">
+        <div class="avatar-lg mx-auto">
+            <div class="avatar-title bg-light text-primary display-5 rounded-circle">
+                <i class="ri-mail-line"></i>
+            </div>
+        </div>
+    </div>
+    <div class="text-muted text-center mx-lg-3">
+        <h4 class="">Verificación OTP</h4>
+        @if (_codigoEnviado)
+        {
+            <p>Por favor ingresa el código OTP que fue envíado al correo y celular registrados</p>
+        }
+        else
+        {
+            <p>Enviado código...</p>
+        }
+        
+    </div>
+
+    <div class="mt-4">
+        <div class="input-container d-flex flex-row justify-content-center mt-2 digit-group main gap-2" style="gap: 10px">
+            <input type="number" class="form-control form-control-lg bg-light border-light text-center" id="digit-1" name="digit-1"
+                   data-next="digit-2" @bind="_otpCode.C1">
+            <input type="number" class="form-control form-control-lg bg-light border-light text-center" id="digit-2" name="digit-2"
+                   data-next="digit-3" data-previous="digit-1" @bind="_otpCode.C2">
+            <input type="number" class="form-control form-control-lg bg-light border-light text-center" id="digit-3" name="digit-3"
+                   data-next="digit-4" data-previous="digit-2" @bind="_otpCode.C3">
+            <input type="number" class="form-control form-control-lg bg-light border-light text-center" id="digit-4" name="digit-4"
+                   data-next="digit-5" data-previous="digit-3" @bind="_otpCode.C4">
+            <input type="number" class="form-control form-control-lg bg-light border-light text-center" id="digit-5" name="digit-5"
+                   data-next="digit-6" data-previous="digit-4" @bind="_otpCode.C5">
+            <input type="number" class="form-control form-control-lg bg-light border-light text-center" id="digit-6" name="digit-6"
+                   data-previous="digit-5" @bind="_otpCode.C6">
+
+        </div>
+        @if (_codigoEnviado)
+        {
+            <div class="mt-3">
+                <_LoadingButton Class="btn btn-info w-100"
+                                IsLoading="_validandoCodigo"
+                                Type="button"
+                                OnClicked="VerificarOtp"
+                                Texto="Continuar" />
+            </div>
+        }
+    </div>
+
+    @if (_codigoEnviado)
+    {
+        <div class="mt-5 text-center">
+            <p class="mb-0">¿No recibiste el código? <a href="javascript:void(0)" @onclick="EnviarCodigoOtp" class="fw-semibold text-primary text-decoration-underline">Reenviar</a> </p>
+        </div>
+    }
+    
+</div>
+
+@code {
+    private bool _isLoading = true;
+    private bool _codigoEnviado = false;
+    private bool _enviandoCodigo = false;
+    private bool _validandoCodigo = false;
+
+    [Parameter]
+    public string ParametrosEncriptados { get; set; } = string.Empty;
+
+    private OtpDto _otpCode { get; set; } = new OtpDto();
+
+    protected override async Task OnAfterRenderAsync(bool firsRender)
+    {
+        try
+        {
+            if (firsRender)
+            {
+                _isLoading = false;
+                StateHasChanged();
+
+                await Task.Yield();
+
+                await EnviarCodigoOtp(); 
+            }
+
+            await _jsRuntime.LoadJSScript("../assetsOTP/js.js");
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, $"Ocurrió un error al procesar otp pass para usuario {ParametrosEncriptados}");
+            await _jsRuntime.NotiflixNotifyAlert("Error interno del servidor", NotiflixMessageType.failure);
+        }
+    }
+
+    private async Task EnviarCodigoOtp()
+    {
+        if (_enviandoCodigo) return;
+
+        _enviandoCodigo = true;
+        StateHasChanged();
+
+        await Task.Yield();
+
+        _otpCode = new OtpDto();
+
+        _codigoEnviado = false;
+        StateHasChanged();
+
+        Dictionary<string, string> parametros = _encryptService.DesencriptarParametros(ParametrosEncriptados);
+
+        long idUsuario = long.Parse(parametros["idusuario"]);
+        string ipAddress = await _jsRuntime.GetIpAddress();
+
+        var response = await _userService.EnviarCodigoOTPPass(idUsuario, ipAddress);
+
+        if (response.IsSuccess)
+        {
+            _codigoEnviado = true;
+            StateHasChanged();
+        }
+        else
+        {
+            await _jsRuntime.NotiflixReportAlert("Error", response.Error, NotiflixMessageType.failure);
+        }
+
+        _enviandoCodigo = false;
+        StateHasChanged();
+    }
+
+    private async void VerificarOtp()
+    {
+        try
+        {
+            if (_validandoCodigo) return;
+
+            _validandoCodigo = true;
+            StateHasChanged();
+            await Task.Yield();
+
+            Dictionary<string, string> parametros = _encryptService.DesencriptarParametros(ParametrosEncriptados);
+
+            long idUsuario = long.Parse(parametros["idusuario"]);
+            string ipAddress = await _jsRuntime.GetIpAddress();
+
+            var respuesta = await _userService.ValidarCodigoOTPPass(_otpCode, idUsuario, ipAddress);
+
+            if (respuesta.IsSuccess)
+            {
+                SolicitudRecuperacionClave solicitud = await _userService.GenerarSolicitudContraseña(idUsuario,ipAddress,"Recuperación de contraseña solicitada por el sistema, validada mediante OTP");
+
+                if(solicitud.Id > 0)
+                {
+                    parametros = new Dictionary<string, string>();
+                    parametros.Add("idSolicitud", solicitud.Id.ToString());
+
+                    string parametrosEncriptados = _encryptService.EncriptarParametros(parametros);
+
+                    await _jsRuntime.NotiflixReportAlertWithCallback("Correcto", "Código validado correctamente", NotiflixMessageType.success);
+
+                    _navigationManager.NavigateTo($"/CambioPass/{parametrosEncriptados}");
+                }
+                else
+                {
+                    await _jsRuntime.NotiflixReportAlert("Error", "No fue posible generar la solicitud de generación de contraseña", NotiflixMessageType.failure);
+                }
+            }
+            else
+            {
+                await _jsRuntime.NotiflixReportAlert("Error", respuesta.Error, NotiflixMessageType.failure);
+
+                _validandoCodigo = false;
+                StateHasChanged();
+            }
+
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, $"Error al generar al verificar otp de recuperacion de contraseña para usuario {ParametrosEncriptados}");
+
+            await _jsRuntime.NotiflixNotifyAlert("Error interno del servidor", NotiflixMessageType.failure);
+        }
+
+        _validandoCodigo = false;
+        StateHasChanged();
+    }
+}

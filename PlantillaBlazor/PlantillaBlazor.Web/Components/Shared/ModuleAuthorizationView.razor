@@ -1,0 +1,106 @@
+﻿@using System.Reflection;
+@using PlantillaBlazor.Services.Interfaces.Perfilamiento
+@using PlantillaBlazor.Domain.Entities.Perfilamiento
+@using PlantillaBlazor.Web.Entities.Authorization
+@using PlantillaBlazor.Web.Services.Authorization
+
+@inject AuthorizationService _authService
+@inject IUsuarioService _usuarioService
+@inject ILogger<PageAuthorizationView> _logger
+
+@if (_isLoading)
+{
+    <span>Autorizando...</span>
+}
+else
+{
+    @if (_autorizado)
+    {
+        @Authorize
+    }
+    else
+    {
+        @NotAuthorize
+    }
+}
+
+@code {
+    private bool _autorizado = false;
+    private bool _isLoading = true;
+
+    private IEnumerable<Modulo> _modulosUsuario;
+
+    [Parameter]
+    public long IdModulo { get; set; } = 0;
+
+    [Parameter]
+    public RenderFragment Authorize { get; set; }
+
+    [Parameter]
+    public RenderFragment NotAuthorize { get; set; }
+
+    [CascadingParameter]
+    protected UserSession? UserSession { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (firstRender)
+            {
+                if (this.IdModulo <= 0)
+                {
+                    _logger.LogError($"Módulo no perfilado: No se definió id");
+                    _autorizado = false;
+                    _isLoading = false;
+                    StateHasChanged();
+                    return;
+                }
+
+                await ConsultarModulos();
+
+                _autorizado = TieneAccesoModulo(IdModulo);
+                _isLoading = false;
+                StateHasChanged();
+                return;
+            }
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, "Error al verificar autorización de módulo");
+            _autorizado = false;
+            _isLoading = false;
+            StateHasChanged();
+            return;
+        }
+    }
+
+    private async Task ConsultarModulos()
+    {
+        try
+        {
+            if (UserSession!.IdUsuario > 0)
+            {
+                _modulosUsuario = await _usuarioService.GetModulosUsuario(UserSession.IdUsuario);
+            }
+            else
+            {
+                _modulosUsuario = new List<Modulo>();
+            }
+
+            if (_modulosUsuario == null) _modulosUsuario = new List<Modulo>();
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, $"Error al consultar módulos para perfilamiento");
+            _modulosUsuario = new List<Modulo>();
+        }
+    }
+
+    private bool TieneAccesoModulo(long idModulo)
+    {
+        bool resultado = _modulosUsuario.Any(m => m.Id == idModulo);
+
+        return resultado;
+    }
+}

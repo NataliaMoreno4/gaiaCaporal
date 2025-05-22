@@ -1,0 +1,156 @@
+﻿@page "/OtpLogin/{ParametrosEncriptados}"
+
+@using PlantillaBlazor.Services.Interfaces.Perfilamiento
+@using PlantillaBlazor.Domain.DTO.OTP
+@using PlantillaBlazor.Domain.Entities.Perfilamiento
+@using PlantillaBlazor.Web.Components.Layout.Otp
+
+@layout OTPLayout
+
+@inject IUsuarioService _userService
+@inject ILogger<OtpLogin> _logger
+
+<_OTPScreen OtpEnviado=@_otpEnviado
+            EnviandoOtp=@_isLoading
+            ValidandoOtp=@_validandoOtp
+            OtpCode=@_otpCode
+            EventoReenviarOTP="EnviarCodigoOTP"
+            EventoVerificarOTP="VerificarCodigoOTP"> 
+</_OTPScreen>
+
+@code {
+    [Parameter]
+    public string ParametrosEncriptados { get; set; } = string.Empty;
+
+    private bool _otpEnviado = false;
+
+    private bool _isLoading = true;
+    private bool _validandoOtp = false;
+
+    private OtpDto _otpCode = new OtpDto();
+
+    private long _idAuditoriaOtp;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (firstRender)
+            {
+                await LoadData();
+            }
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, $"Error al generar OTP login");
+            await _jsRuntime.NotiflixNotifyAlert( "Error al consultar los datos del usuario", NotiflixMessageType.failure);
+            _navigationManager.NavigateTo("/", forceLoad: true);
+        }
+    }
+
+    private async Task LoadData()
+    {
+        _otpEnviado = false;
+
+        _isLoading = true;
+        StateHasChanged();
+
+        Dictionary<string, string> parametros = _encryptService.DesencriptarParametros(ParametrosEncriptados);
+
+        long idUsuario = long.Parse(parametros["idusuario"]);
+
+        Usuario user = await _userService.GetUsuarioById(idUsuario);
+
+        if (user is null)
+        {
+            await _jsRuntime.NotiflixReportAlert("Error", "Link no válido", NotiflixMessageType.failure);
+            _navigationManager.NavigateTo("/", forceLoad: true);
+            return;
+        }
+
+        var remoteIpAddress = await _jsRuntime.GetIpAddress();
+
+        var respuesta = await _userService.EnviarCodigoOTPLogin(idUsuario, remoteIpAddress);
+
+        if (!respuesta.IsSuccess)
+        {
+            await _jsRuntime.NotiflixReportAlert("Error", respuesta.Error, NotiflixMessageType.failure);
+            _navigationManager.NavigateTo("/", forceLoad: true);
+        }
+
+        _idAuditoriaOtp = respuesta.Value;
+
+        _isLoading = false;
+        StateHasChanged();
+
+        if (respuesta.IsSuccess)
+        {
+            _otpEnviado = true;
+            StateHasChanged();
+        }
+
+    }
+
+    private async Task EnviarCodigoOTP()
+    {
+        try
+        {
+            await LoadData();
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, $"Error al generar OTP de usuario");
+            await _jsRuntime.NotiflixNotifyAlert( "Error al consultar los datos del cliente", NotiflixMessageType.failure);
+
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task VerificarCodigoOTP()
+    {
+        try
+        {
+            _validandoOtp = true;
+            StateHasChanged();
+
+            await Task.Yield();
+
+            Dictionary<string, string> parametros = _encryptService.DesencriptarParametros(ParametrosEncriptados);
+
+            long idUsuario = long.Parse(parametros["idusuario"]);
+            string idAuditoria = parametros["idauditorialogin"];
+
+            var remoteIpAddress = await _jsRuntime.GetIpAddress();
+
+            var respuesta = await _userService.ValidarCodigoOTP(_otpCode, idUsuario, remoteIpAddress);
+
+            if (respuesta.IsSuccess)
+            {
+                var parametrosAuth = new Dictionary<string, string>()
+                {
+                    { "id", idAuditoria },
+                    { "idOtp", _idAuditoriaOtp.ToString() },
+                    { "rememberme", parametros["rememberme"] }
+                };
+
+                string authEncryptado = _encryptService.EncriptarParametros(parametrosAuth);
+
+                await _jsRuntime.NotiflixReportAlertWithCallback("Correcto", "Código validado correctamente", NotiflixMessageType.success);
+                _navigationManager.NavigateTo($"/auth/login?data={authEncryptado}", forceLoad: true);
+            }
+            else
+            {
+                await _jsRuntime.NotiflixReportAlert("Error", respuesta.Error, NotiflixMessageType.failure);
+            }
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, $"Error al validar OTP Login");
+            await _jsRuntime.NotiflixNotifyAlert("Error al consultar los datos del usuario", NotiflixMessageType.failure);
+        }
+
+        _validandoOtp = false;
+        StateHasChanged();
+    }
+}
