@@ -72,35 +72,6 @@ namespace PlantillaBlazor.Web
                 //context.Response.Headers.Add("Pragma", "no-cache");
 
 
-                #region CSP
-
-                string finalCsp = "";
-
-                string path = context.Request.Path.Value;
-
-                if (path.Equals("/") || path.Equals("/login") || path.Equals("/ReestablecerContraseña") || path.Equals("/404"))
-                {
-                    //CSP para scanners
-
-                    /*
-                     Para los scanners se habilita un csp para aquellas url que son publicas
-                    En este csp se aplican las directivas como default-src 'none' o en style-src se quita la
-                    opción de unsafe-line.
-
-                    Si se llegaran a aplicar estas directivas en todo el aplicativo, es probable que deje de funcionar
-                     */
-
-                    finalCsp = @"default-src 'none'; font-src 'self' fonts.gstatic.com unicons.iconscout.com cdnjs.cloudflare.com data:; img-src 'self' data:; script-src 'self' www.google.com www.gstatic.com www.googletagmanager.com; style-src 'self' https://unicons.iconscout.com https://fonts.googleapis.com cdnjs.cloudflare.com stackpath.bootstrapcdn.com https://www.googletagmanager.com; connect-src 'self' https://unicons.iconscout.com https://fonts.googleapis.com https://cdn.lordicon.com cdnjs.cloudflare.com fonts.gstatic.com www.google.com www.gstatic.com www.googletagmanager.com www.google-analytics.com stackpath.bootstrapcdn.com;frame-ancestors 'none';form-action 'self'; frame-src https://www.google.com www.gstatic.com; base-uri 'self';object-src 'self';manifest-src 'self'";
-                }
-                else
-                {
-                    finalCsp = @"default-src 'none'; font-src 'self' fonts.gstatic.com unicons.iconscout.com cdnjs.cloudflare.com data:; img-src 'self' data:; script-src 'self' www.google.com www.gstatic.com www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://unicons.iconscout.com https://fonts.googleapis.com cdnjs.cloudflare.com stackpath.bootstrapcdn.com https://www.googletagmanager.com; connect-src 'self' https://unicons.iconscout.com https://fonts.googleapis.com https://cdn.lordicon.com cdnjs.cloudflare.com fonts.gstatic.com www.google.com www.gstatic.com www.googletagmanager.com www.google-analytics.com stackpath.bootstrapcdn.com;frame-ancestors 'none';form-action 'self'; frame-src https://www.google.com www.gstatic.com; base-uri 'self';object-src 'self';manifest-src 'self'";
-                }
-
-                context.Response.Headers.Add("Content-Security-Policy", finalCsp);
-
-                #endregion
-
                 await next();
             });
 
