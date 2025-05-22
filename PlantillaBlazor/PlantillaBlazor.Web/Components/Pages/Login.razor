@@ -358,16 +358,15 @@ else
                 {
                     Usuario user = await _usuarioService.GetUsuarioByUser(_usuario.Usuario);
 
-                    Dictionary<string, string> parametros = new Dictionary<string, string>()
+                    var parametrosAuth = new Dictionary<string, string>()
                     {
-                        {"idusuario",user.Id.ToString()},
-                        {"rememberme", _rememberMe.ToString()},
-                        {"idauditorialogin",respuesta.Value.ToString()}
+                        { "id", respuesta.Value.ToString() },
+                        { "rememberme", _rememberMe.ToString() }
                     };
 
-                    string parametroEncriptado = _encryptService.EncriptarParametros(parametros);
+                    string authEncryptado = _encryptService.EncriptarParametros(parametrosAuth);
 
-                    _navigationManager.NavigateTo($"/OtpLogin/{parametroEncriptado}", forceLoad: true);
+                    _navigationManager.NavigateTo($"/auth/login?data={authEncryptado}", forceLoad: true);
                 }
                 else if (respuesta.RespuestaLogin == TipoRespuestaLogin.CAMBIO_CONTRASEÑA)
                 {

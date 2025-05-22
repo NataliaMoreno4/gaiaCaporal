@@ -41,27 +41,22 @@ namespace PlantillaBlazor.Web.Controllers
             {
                 var parametros = _encryptService.DesencriptarParametros(data);
 
-                if (!long.TryParse(parametros["idOtp"], out var idOtp))
+                if (!long.TryParse(parametros["id"], out var idAuditoria))
                 {
                     return Unauthorized();
                 }
 
-                var otp = await _otpService.GetOtpById(idOtp);
+                var auditoria = await _usuarioService.GetAuditoriaLogin(idAuditoria);
 
-                if (otp is null) return Unauthorized();
+                if (auditoria is null) return Unauthorized();
 
-                if (!long.TryParse(otp.IdentificacionProceso, out var idUsuario))
-                {
-                    return Unauthorized();
-                }
-
-                var usuario = await _usuarioService.GetUsuarioById(idUsuario);
+                var usuario = await _usuarioService.GetUsuarioById(auditoria.IdUsuario);
 
                 if (usuario is null) return Unauthorized();
 
-                if (!otp.Estado.Equals("VERIFICADO")) return Unauthorized();
+                if (!auditoria.Descripcion.Equals("Exitoso")) return Unauthorized();
 
-                if ((DateTime.Now - otp.FechaValidacion.Value).TotalMinutes > 1) return Unauthorized();
+                if ((DateTime.Now - auditoria.FechaLogin).TotalMinutes > 1) return Unauthorized();
 
                 //Creación de la cookie
 
@@ -69,15 +64,14 @@ namespace PlantillaBlazor.Web.Controllers
 
                 bool.TryParse(parametros["rememberme"], out rememberMe);
 
-                string idAuditoria = parametros["id"];
                 string url = $"{Request.Scheme}://{Request.Host.Value}";
 
                 var session = new Session()
                 {
                     FechaUltimoIngreso = DateTime.Now,
                     Host = url,
-                    IdAuditoriaLogin = long.Parse(idAuditoria),
-                    IdUsuario = idUsuario,
+                    IdAuditoriaLogin = idAuditoria,
+                    IdUsuario = usuario.Id,
                     IpAddress = HttpContext.Connection.RemoteIpAddress.ToString(),
                     IsActive = true,
                     RememberMe = rememberMe,
@@ -93,12 +87,11 @@ namespace PlantillaBlazor.Web.Controllers
                 long idSession = resultSession.Value;
 
                 var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
-                identity.AddClaim(new Claim("IdUsuario", idUsuario.ToString()));
+                identity.AddClaim(new Claim("IdUsuario", usuario.Id.ToString()));
                 identity.AddClaim(new Claim("IdSession", idSession.ToString()));
                 identity.AddClaim(new Claim("IdAuditoria", idAuditoria.ToString()));
                 identity.AddClaim(new Claim("RememberMe", rememberMe.ToString()));
                 identity.AddClaim(new Claim("Url", url));
-                identity.AddClaim(new Claim("TipoUsuario", "Normal"));
 
                 var principal = new ClaimsPrincipal(identity);
 

@@ -97,7 +97,7 @@
                                 @producto.Descripcion
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn TItem="Producto" Property="IdCategoria" Title="Categoría" Type="typeof(IEnumerable<long>)"
+                        @* <RadzenDataGridColumn TItem="Producto" Property="IdCategoria" Title="Categoría" Type="typeof(IEnumerable<long>)"
                                               FilterValue="@_selectedCategoriaIds" FilterOperator="FilterOperator.Contains" LogicalFilterOperator="LogicalFilterOperator.Or">
                             <FilterTemplate>
                                 <RadzenCustomDropDown @bind-Value=@_selectedCategoriaIds Change=@OnselectedCategoriasIdsChange Data="@(_categorias)" AllowClear="true" ValueProperty="Id" TextProperty="Nombre" Multiple="true" />
@@ -108,7 +108,7 @@
                             <Template Context="producto">
                                 @producto.Categoria?.Nombre
                             </Template>
-                        </RadzenDataGridColumn>
+                        </RadzenDataGridColumn> *@
                         <RadzenDataGridColumn TItem="Producto" Property="IdMercado" Title="Mercado" Type="typeof(IEnumerable<long>)"
                                               FilterValue="@_selectedMercadoIds" FilterOperator="FilterOperator.Contains" LogicalFilterOperator="LogicalFilterOperator.Or">
                             <FilterTemplate>
