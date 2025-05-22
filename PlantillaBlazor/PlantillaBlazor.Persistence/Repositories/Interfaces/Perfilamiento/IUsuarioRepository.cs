@@ -1,10 +1,5 @@
 ﻿using PlantillaBlazor.Domain.Entities.Perfilamiento;
 using PlantillaBlazor.Persistence.Repositories.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PlantillaBlazor.Persistence.Repositories.Interfaces.Perfilamiento
 {
@@ -21,5 +16,6 @@ namespace PlantillaBlazor.Persistence.Repositories.Interfaces.Perfilamiento
         /// <param name="diasDesdeUltimoLoggeo">Días desde los cuales no se han loggeado los usuarios</param>
         /// <returns>Booleano indicando si la operación fue exitosa</returns>
         public Task<bool> InactivarUsuariosNoActivos(int diasDesdeUltimoLoggeo);
+        public Task<AuditoriaLoginUsuario> GetAuditoriaLoginUsuario(long id);
     }
 }

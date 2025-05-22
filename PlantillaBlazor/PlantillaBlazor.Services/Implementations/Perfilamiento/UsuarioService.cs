@@ -2681,5 +2681,10 @@ namespace PlantillaBlazor.Services.Implementations.Perfilamiento
 
             return Result<bool>.Success(true);
         }
+
+        public async Task<AuditoriaLoginUsuario> GetAuditoriaLogin(long id)
+        {
+            return await _usuarioRepository.GetAuditoriaLoginUsuario(id);
+        }
     }
 }

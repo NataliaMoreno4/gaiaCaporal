@@ -43,7 +43,7 @@ namespace PlantillaBlazor.Web.Entities.Authorization
             var idAuditoria = claims.FirstOrDefault(c => c.Type == "IdAuditoria")!.Value;
             var rememberMe = claims.FirstOrDefault(c => c.Type == "RememberMe")!.Value;
             var url = claims.FirstOrDefault(c => c.Type == "Url")!.Value;
-            var tipoUsuario = claims.FirstOrDefault(c => c.Type == "TipoUsuario")!.Value;
+            var tipoUsuario = "Normal";
 
             userSession.IdUsuario = long.Parse(idUsuario);
             userSession.IdAuditoriaLogin = idAuditoria;

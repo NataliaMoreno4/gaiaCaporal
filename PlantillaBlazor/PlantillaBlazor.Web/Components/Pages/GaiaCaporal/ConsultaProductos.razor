@@ -38,35 +38,36 @@
             </div>
             <div class="card-body">
                 <div class="flex" style="justify-content: space-evenly">
-                    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Agregar nuevo producto" Click="@InsertRow" Disabled=@(_productoToInsert != null || _productoToUpdate != null) />
+                    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4"
+                        Text="Agregar nuevo producto" Click="@InsertRow" Disabled=@(_productoToInsert != null ||
+                                                                                                 _productoToUpdate != null) />
 
                 </div>
 
-                <RadzenDataGridApp AllowVirtualization="false"
-                                   @ref="_productosGrid"
-                                   Data="@_productos"
-                                   TItem="Producto"
-                                   IsLoading="@_isLoading"
-                                   EditMode="DataGridEditMode.Single"
-                                   RowUpdate="@OnUpdateRow"
-                                   RowCreate="@OnCreateRow"
-                                   Sort="@Reset"
-                                   Page="@Reset"
-                                   Filter="@Reset">
+                <RadzenDataGridApp AllowVirtualization="false" @ref="_productosGrid" Data="@_productos" TItem="Producto"
+                    IsLoading="@_isLoading" EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow"
+                    RowCreate="@OnCreateRow" Sort="@Reset" Page="@Reset" Filter="@Reset">
                     <Columns>
-                        <RadzenDataGridColumn TItem="Producto" Frozen="true" Filterable="false" Sortable="false" TextAlign="TextAlign.Center">
+                        <RadzenDataGridColumn TItem="Producto" Frozen="true" Filterable="false" Sortable="false"
+                            TextAlign="TextAlign.Center">
                             <Template Context="producto">
-                                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(producto))" @onclick:stopPropagation="true">
+                                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat"
+                                    Size="ButtonSize.Medium" Click="@(args => EditRow(producto))"
+                                    @onclick:stopPropagation="true">
                                 </RadzenButton>
                             </Template>
                             <EditTemplate Context="producto">
-                                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(producto))">
+                                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat"
+                                    Size="ButtonSize.Medium" Click="@((args) => SaveRow(producto))">
                                 </RadzenButton>
-                                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(producto))">
+                                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat"
+                                    Size="ButtonSize.Medium" class="my-1 ms-1"
+                                    Click="@((args) => CancelEdit(producto))">
                                 </RadzenButton>
                             </EditTemplate>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn TItem="Producto" Width="140px" Property="FechaAdicion" Title="Fecha de Adición">
+                        <RadzenDataGridColumn TItem="Producto" Width="140px" Property="FechaAdicion"
+                            Title="Fecha de Adición">
                             <EditTemplate Context="producto">
                                 <div style="text-align:center">
                                     @("-")
@@ -77,7 +78,8 @@
                             <EditTemplate Context="producto">
                                 @if (_productoToUpdate is null)
                                 {
-                                        <input type="text" class="form-control" @bind-value="producto.NombreProducto" placeholder="Nombre del Producto" />
+                                    <input type="text" class="form-control" @bind-value="producto.NombreProducto"
+                                        placeholder="Nombre del Producto" />
                                 }
                                 else
                                 {
@@ -88,56 +90,53 @@
                                 @producto.NombreProducto
                             </Template>
                         </RadzenDataGridColumn>
-                        
+
                         <RadzenDataGridColumn TItem="Producto" Property="Descripcion" Title="Descripción">
                             <EditTemplate Context="producto">
-                                <input type="text" class="form-control" @bind-value="producto.Descripcion" placeholder="Descripción" />
+                                <input type="text" class="form-control" @bind-value="producto.Descripcion"
+                                    placeholder="Descripción" />
                             </EditTemplate>
                             <Template Context="producto">
                                 @producto.Descripcion
                             </Template>
                         </RadzenDataGridColumn>
                         <RadzenDataGridColumn TItem="Producto" Property="IdCategoria" Title="Categoría"
-                                              Type="typeof(IEnumerable<long>)"
-                                              FilterValue="@_selectedCategoriaIds"
-                                              FilterOperator="FilterOperator.Contains"
-                                              LogicalFilterOperator="LogicalFilterOperator.Or">
+                            Type="typeof(IEnumerable<long>)" FilterValue="@_selectedCategoriaIds"
+                            FilterOperator="FilterOperator.Contains" LogicalFilterOperator="LogicalFilterOperator.Or">
 
                             <FilterTemplate>
                                 <RadzenCustomDropDown @bind-Value="_selectedCategoriaIds"
-                                                      Change="@OnselectedCategoriasIdsChange"
-                                                      Data="@_categorias.ListaParametrosDetallados"
-                                                      AllowClear="true"
-                                                      ValueProperty="Id"
-                                                      TextProperty="Nombre"
-                                                      Multiple="true" />
+                                    Change="@OnselectedCategoriasIdsChange"
+                                    Data="@_categorias.ListaParametrosDetallados" AllowClear="true" ValueProperty="Id"
+                                    TextProperty="Nombre" Multiple="true" />
                             </FilterTemplate>
 
                             <EditTemplate Context="producto">
-                                <RadzenCustomDropDown AllowClear="false"
-                                                      TValue="long"
-                                                      class="form-control"
-                                                      Placeholder="[Seleccionar]"
-                                                      @bind-Value="producto.IdCategoria"
-                                                      Data="@_categorias.ListaParametrosDetallados"
-                                                      TextProperty="Nombre"
-                                                      ValueProperty="Id" />
+                                <RadzenCustomDropDown AllowClear="false" TValue="long" class="form-control"
+                                    Placeholder="[Seleccionar]" @bind-Value="producto.IdCategoria"
+                                    Data="@_categorias.ListaParametrosDetallados" TextProperty="Nombre"
+                                    ValueProperty="Id" />
                             </EditTemplate>
 
                             <Template Context="producto">
-                                @producto.Categoria?.Nombre
+                                @_categorias.ListaParametrosDetallados.FirstOrDefault(_ => _.Id == producto.IdCategoria)?.Nombre
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn TItem="Producto" Property="IdMercado" Title="Mercado" Type="typeof(IEnumerable<long>)"
-                                              FilterValue="@_selectedMercadoIds" FilterOperator="FilterOperator.Contains" LogicalFilterOperator="LogicalFilterOperator.Or">
+                        <RadzenDataGridColumn TItem="Producto" Property="IdMercado" Title="Mercado"
+                            Type="typeof(IEnumerable<long>)" FilterValue="@_selectedMercadoIds"
+                            FilterOperator="FilterOperator.Contains" LogicalFilterOperator="LogicalFilterOperator.Or">
                             <FilterTemplate>
-                                <RadzenCustomDropDown @bind-Value=@_selectedMercadoIds Change=@OnselectedMercadosIdsChange Data="@(_mercados)" AllowClear="true" ValueProperty="Id" TextProperty="Nombres" Multiple="true" />
+                                <RadzenCustomDropDown @bind-Value=@_selectedMercadoIds
+                                    Change=@OnselectedMercadosIdsChange Data="@(_mercados)" AllowClear="true"
+                                    ValueProperty="Id" TextProperty="Nombres" Multiple="true" />
                             </FilterTemplate>
                             <EditTemplate Context="producto">
-                                <RadzenCustomDropDown AllowClear="false" TValue="long" class="form-control" Placeholder="[Seleccionar]" @bind-value="producto.IdMercado" Data=@_mercados TextProperty="Nombres" ValueProperty="Id" />
+                                <RadzenCustomDropDown AllowClear="false" TValue="long" class="form-control"
+                                    Placeholder="[Seleccionar]" @bind-value="producto.IdMercado" Data=@_mercados
+                                    TextProperty="Nombres" ValueProperty="Id" />
                             </EditTemplate>
                             <Template Context="producto">
-                                @producto.Mercado?.Nombres
+                                @_mercados.FirstOrDefault(_ => _.Id == producto.IdMercado)?.NombreUsuario
                             </Template>
                         </RadzenDataGridColumn>
                     </Columns>
@@ -196,7 +195,7 @@
         var tMercados = _userService.GetUsuarios();
         var tProductos = _gaiaCaporalService.GetProductos();
 
-        await Task.WhenAll(tCategorias,tMercados, tProductos);
+        await Task.WhenAll(tCategorias, tMercados, tProductos);
 
         _categorias = await tCategorias;
         _productos = await tProductos;

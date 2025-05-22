@@ -28,5 +28,6 @@ namespace PlantillaBlazor.Services.Interfaces.Perfilamiento
         public Task<bool> InhabilitarSolicitudesCambioPassCaducadas(int dias);
         public Task<Result<SessionDTO>> ProcesarIngresoUsuarioOAuth(OAuthUserDTO user);
         public Task<Result<bool>> ActualizarInfoUsuarioOAuth(Usuario usuario);
+        public Task<AuditoriaLoginUsuario> GetAuditoriaLogin(long id);
     }
 }

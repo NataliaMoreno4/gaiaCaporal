@@ -1,0 +1,199 @@
+@import url("https://fonts.googleapis.com/css2?family=Madimi+One&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100dvh;
+  font-family: "Madimi One", sans-serif;
+}
+
+.mercado-container {
+  display: grid;
+  grid-template-rows: 80px 1fr auto;
+}
+
+input[type="text"] {
+  font-family: "Madimi One", sans-serif;
+  font-weight: 400;
+}
+
+header {
+  background-color: #e7ffcd;
+  display: flex;
+  padding: 15px 15px;
+  gap: 20px;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.imgTienda {
+  width: 40px;
+  height: 40px;
+}
+
+.container-buscar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  max-width: 70%;
+}
+
+.img-btn-buscar {
+  width: 20px;
+  height: 20px;
+}
+
+.btn-buscar {
+  background-color: #a4ffa1;
+  border-color: transparent;
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.txtBuscar {
+  min-height: 30px;
+  border-radius: 10px;
+  border-color: transparent;
+  outline-color: transparent;
+  width: 100%;
+  padding: 5px 10px;
+}
+
+.imgProfile {
+  width: 30px;
+  height: 30px;
+}
+
+.container-carro img {
+  width: 30px;
+  height: 30px;
+}
+
+.container-carro {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-weight: 550;
+}
+
+main {
+  background-color: #fff;
+}
+
+.banner-principal {
+  background-color: #dfdfdf;
+  min-height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0;
+}
+
+.card-descuentos {
+  max-width: 500px;
+  position: relative;
+}
+
+.card-descuentos img {
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+}
+
+.card-descuentos span {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 32px;
+  color: #ff8b8b;
+  width: 100%;
+  text-align: center;
+}
+
+/* CATEGORIAS */
+
+.container-categorias {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  gap: 20px;
+}
+
+.container-categorias h3 {
+  font-size: 24px;
+  color: #b29063;
+}
+
+.container-categorias__cards {
+  display: flex;
+  flex-wrap: wrap;
+  width: 70%;
+  padding: 0 50px;
+  justify-content: space-around;
+  align-items: center;
+  align-content: center;
+}
+
+.categoria-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.categoria-card__img {
+  border-radius: 50px;
+  box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+}
+
+.categoria-card__img img {
+  width: 150px;
+  padding: 10px;
+}
+
+.categoria-card h4 {
+  color: #b29063;
+}
+
+.container-categorias__cards a {
+  text-decoration: none;
+}
+
+.recomendado-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  height: 300px;
+  width: 250px;
+}
+
+.recomendado-card__img {
+  width: 100%;
+  height: 100%;
+}
+
+.recomendado-card__img img {
+  width: 100%;
+  padding: 10px;
+  min-height: 200px;
+  object-fit: cover;
+  border-radius: 20px;
+  height: 100%;
+}
+
+.container-categorias__cards.recomendado {
+  gap: 50px;
+}

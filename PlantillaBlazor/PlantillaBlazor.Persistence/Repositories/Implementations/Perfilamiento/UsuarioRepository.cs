@@ -114,5 +114,11 @@ namespace PlantillaBlazor.Persistence.Repositories.Implementations.Perfilamiento
 
             return entities > 0;
         }
+        public async Task<AuditoriaLoginUsuario> GetAuditoriaLoginUsuario(long id)
+        {
+            using var context = _dbContextFactory.CreateDbContext();
+
+            return await context.AuditoriaLoginUsuario.FindAsync(id);
+        }
     }
 }

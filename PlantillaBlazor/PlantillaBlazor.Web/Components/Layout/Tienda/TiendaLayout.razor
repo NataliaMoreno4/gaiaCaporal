@@ -1,0 +1,52 @@
+﻿@inherits LayoutComponentBase
+
+@inject ILogger<TiendaLayout> _logger
+
+<HeadContent>
+    <link rel="stylesheet" href="assetsTienda/style.css">
+</HeadContent>
+
+<_LoadingSpinner></_LoadingSpinner>
+
+<div class="mercado-container">
+        <header>
+            <img src="https://www.shutterstock.com/image-vector/shop-icon-store-symbol-flat-600w-293567324.jpg"
+                class="imgTienda">
+
+            <div class="container-buscar">
+                <input type="text" class="txtBuscar" />
+                <a href="#" class="btn-buscar">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3721/3721746.png" class="img-btn-buscar">
+                </a>
+            </div>
+
+            <div class="container-carro">
+                <img class="imgProfile" src="https://cdn-icons-png.flaticon.com/512/6522/6522516.png">
+                <img src="https://cdn-icons-png.flaticon.com/512/107/107831.png">
+                Carrito
+            </div>
+        </header>
+        <main>
+            @Body
+        </main>
+        <footer>
+        </footer>
+    </div>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (firstRender)
+            {
+
+                await _jsRuntime.InvokeVoidAsync("agregarClase", ".loaderOverlay", "inactive");
+            }
+        }
+        catch (Exception exe)
+        {
+            await _jsRuntime.NotiflixReportAlert("Error", "Ocurrió un error al cargar esta pantalla", NotiflixMessageType.failure);
+        }
+    }
+}
