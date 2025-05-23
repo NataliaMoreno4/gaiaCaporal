@@ -43,10 +43,9 @@
     right: 0;
     left: 0;
     z-index: 1002;
-    background-color: var(--vz-header-bg);
+    background-color: #e7ffcd;
     -webkit-transition: all .1s ease-out;
-    transition: all .1s ease-out;
-    border-bottom: 1px solid var(--vz-header-border)
+    transition: all .1s ease-out
 }
 
     #page-topbar.topbar-shadow {
@@ -119,11 +118,11 @@
 }
 
 .navbar-header .user-name-sub-text {
-    color: var(--vz-header-item-sub-color)
+    color: #25283D
 }
 
 .navbar-header .user-name-text {
-    color: var(--vz-header-item-color)
+    color: #25283D
 }
 
 .app-search {
@@ -228,7 +227,7 @@
 
 @media (min-width:768px) {
     .topbar-user {
-        background-color: var(--vz-topbar-user-bg)
+        background-color: #d7ebc2
     }
 }
 
