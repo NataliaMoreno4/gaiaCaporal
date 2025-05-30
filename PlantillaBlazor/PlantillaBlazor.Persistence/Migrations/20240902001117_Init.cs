@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -577,7 +576,7 @@ namespace PlantillaBlazor.Persistence.Migrations
                 schema: "Seg",
                 table: "Usuario",
                 columns: new[] { "Id", "Apellidos", "Celular", "Clave", "Email", "FechaAdicion", "FechaUltimaActualizacion", "FechaUltimoCambioContraseña", "FechaUltimoIngreso", "IdRol", "IdUsuarioAdiciono", "IdUsuarioUltimaActualizacion", "IsActive", "IsTwoFAEnabled", "MustChangePassword", "NombreUsuario", "Nombres" },
-                values: new object[] { 1L, "Administrador", "", "$2a$10$shiRv6MY8eRdGrMd./ISYOSdhkxcfEEulDJQeVzF8JTGUJi/jK1Pq", "leonardo.arias@excellentiam.co", new DateTime(2024, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, null, 1L, null, null, true, false, true, "Administrador", "Administrador" });
+                values: new object[] { 1L, "Administrador", "", "$2a$10$shiRv6MY8eRdGrMd./ISYOSdhkxcfEEulDJQeVzF8JTGUJi/jK1Pq", "natmorenos42@gmail.com", new DateTime(2024, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, null, 1L, null, null, true, false, true, "Administrador", "Administrador" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AuditoriaAdjuntoEmail_IdAuditoriaEnvioEmail",

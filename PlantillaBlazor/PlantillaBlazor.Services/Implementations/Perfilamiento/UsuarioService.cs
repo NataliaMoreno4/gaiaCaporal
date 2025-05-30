@@ -578,33 +578,6 @@ namespace PlantillaBlazor.Services.Implementations.Perfilamiento
 
             #endregion
 
-            EmailInfoDTO emailInfo = new EmailInfoDTO()
-            {
-                Asunto = $"Código OTP Login - {nombreAplicativo}",
-                Mensaje = cuerpoCorreo,
-                Descripcion = "Código OTP verificación Login",
-                IdentificacionProceso = usuario.Id.ToString(),
-                Pantalla = "Login"
-            };
-
-            emailInfo.Destinatarios.Add(usuario.Email);
-
-            bool resultado = await _emailService.EnviarCorreo(emailInfo);
-
-            if (!string.IsNullOrEmpty(usuario.Celular))
-            {
-                string mensaje = auditoriaOtp.Codigo;
-
-                await _whatsappMessageSender.SendWhatsappMessageOTP(usuario.Celular, mensaje, "Código OTP Login", usuario.Id.ToString(), "Login");
-            }
-
-            await _otpService.GuardarCodigoOtp(auditoriaOtp);
-
-            if (resultado)
-            {
-                return Result<long>.Success(auditoriaOtp.Id);
-            }
-
             return Result<long>.Failure("No posible enviar el código de verificación vía correo");
         }
 
@@ -1046,22 +1019,6 @@ namespace PlantillaBlazor.Services.Implementations.Perfilamiento
 
             emailInfo.Destinatarios.Add(usuario.Email);
 
-            bool resultado = await _emailService.EnviarCorreo(emailInfo);
-
-            if (!string.IsNullOrEmpty(usuario.Celular))
-            {
-                string mensaje = auditoriaOtp.Codigo;
-
-                await _whatsappMessageSender.SendWhatsappMessageOTP(usuario.Celular, mensaje, "Código OTP Login", usuario.Id.ToString(), "Login");
-            }
-
-            await _otpService.GuardarCodigoOtp(auditoriaOtp);
-
-            if (resultado)
-            {
-                return Result<long>.Success(auditoriaOtp.Id);
-            }
-
             return Result<long>.Failure("No posible enviar el código de verificación vía correo");
         }
 
@@ -1413,22 +1370,6 @@ namespace PlantillaBlazor.Services.Implementations.Perfilamiento
                     ";
 
             #endregion
-
-            EmailInfoDTO emailInfo = new EmailInfoDTO()
-            {
-                Asunto = "Reestablecimiento de Contraseña",
-                Mensaje = mensajeCorreo,
-                Descripcion = "Correo de reestablecimiento de contraseña",
-                IdentificacionProceso = usuario.Id.ToString(),
-                Pantalla = "Reestablecimiento de contraseña"
-            };
-
-            emailInfo.Destinatarios.Add(usuario.Email);
-
-            if (!await _emailService.EnviarCorreo(emailInfo))
-            {
-                return Result<bool>.Failure("No fue posible enviar el correo de reestablecimiento de contraseña");
-            }
 
             return Result<bool>.Success(true);
         }
@@ -1936,10 +1877,6 @@ namespace PlantillaBlazor.Services.Implementations.Perfilamiento
                 Pantalla = "Reestablecimiento de contraseña"
             };
 
-            emailInfo.Destinatarios.Add(usuario.Email);
-
-            await _emailService.EnviarCorreo(emailInfo);
-
             return Result<bool>.Success(true);
         }
 
@@ -2438,17 +2375,6 @@ namespace PlantillaBlazor.Services.Implementations.Perfilamiento
 
                 #endregion
 
-                EmailInfoDTO emailInfo = new EmailInfoDTO()
-                {
-                    Asunto = "Confirmación de nuevo usuario",
-                    Descripcion = "Correo de confirmación de creación de nuevo usuario",
-                    IdentificacionProceso = usuario.Id.ToString(),
-                    Mensaje = correoBienvenida,
-                };
-
-                emailInfo.Destinatarios.Add(usuario.Email);
-
-                await _emailService.EnviarCorreo(emailInfo);
             }
             else
             {

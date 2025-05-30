@@ -1,6 +1,4 @@
 ﻿using PlantillaBlazor.Services.Interfaces.Perfilamiento;
-using DocumentFormat.OpenXml.Drawing.Charts;
-using Microsoft.Extensions.Hosting;
 
 namespace PlantillaBlazor.Web.BackgroundServices
 {
@@ -42,14 +40,12 @@ namespace PlantillaBlazor.Web.BackgroundServices
         {
             try
             {
-                await InactivarUsuarios();
 
                 using var timer = new PeriodicTimer(Period);
 
                 while (!stoppingToken.IsCancellationRequested &&
                        await timer.WaitForNextTickAsync(stoppingToken))
                 {
-                    await InactivarUsuarios();
                 }
             }
             catch (OperationCanceledException oce)

@@ -12,6 +12,8 @@ namespace PlantillaBlazor.Domain.Entities.GaiaCaporal
     {
         public string NombreProducto { get; set; } = string.Empty;
         public string Descripcion { get; set; } = string.Empty;
+        public string FotoUrl { get; set; } = string.Empty;
+        public int StockDisponible { get; set; }
         public decimal? CostoUnitario { get; set; }
         public long IdCategoria { get; set; }
         public virtual ParametroDetallado? Categoria { get; set; }

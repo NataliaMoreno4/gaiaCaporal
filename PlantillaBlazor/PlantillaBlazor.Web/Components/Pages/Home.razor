@@ -1,8 +1,17 @@
 ﻿@page "/Home"
 
 @attribute [PageInfo(Perfilable = false)]
-
+@using PlantillaBlazor.Domain.Entities.GaiaCaporal
+@using PlantillaBlazor.Domain.Entities.Parametrizacion
+@using PlantillaBlazor.Domain.Entities.Perfilamiento
+@using PlantillaBlazor.Services.Interfaces.GaiaCaporal
+@using PlantillaBlazor.Services.Interfaces.Parametrizacion
 @using PlantillaBlazor.Services.Interfaces.Perfilamiento
+
+@inject IUsuarioService _userService
+@inject IGaiaCaporalService _gaiaCaporalService
+@inject IParametroGeneralService _parametroGeneralService
+@inject ILogger<Home> _logger
 
 <!-- start page title -->
 <div class="row">
@@ -31,13 +40,13 @@
                         <h5 class="fs-16">Filters</h5>
                     </div>
                     <div class="flex-shrink-0">
-                        <a href="#" class="text-decoration-underline" id="clearall">Borrar todo</a>
+                        <a href="/Home" class="text-decoration-underline" id="clearall">Borrar todo</a>
                     </div>
                 </div>
 
                 <div class="filter-choices-input">
                     <input class="form-control" data-choices="" data-choices-removeitem="" type="text"
-                           id="filter-choices-input" value="Manzanas...">
+                           id="filter-choices-input" value="Busca tus productos">
                 </div>
             </div>
 
@@ -47,14 +56,12 @@
                     <div>
                         <p class="text-muted text-uppercase fs-12 fw-medium mb-2">Productos</p>
                         <ul class="list-unstyled mb-0 filter-list">
-                            
                             <li>
                                 <a href="#" class="d-flex py-1 align-items-center">
                                     <div class="flex-grow-1">
                                         <h5 class="fs-13 mb-0 listname">Verduras</h5>
                                     </div>
                                     <div class="flex-shrink-0 ms-2">
-                                        <span class="badge bg-light text-muted">5</span>
                                     </div>
                                 </a>
                             </li>
@@ -64,7 +71,6 @@
                                         <h5 class="fs-13 mb-0 listname">Frutas</h5>
                                     </div>
                                     <div class="flex-shrink-0 ms-2">
-                                        <span class="badge bg-light text-muted">3</span>
                                     </div>
                                 </a>
                             </li>
@@ -74,7 +80,6 @@
                                         <h5 class="fs-13 mb-0 listname">Lacteos</h5>
                                     </div>
                                     <div class="flex-shrink-0 ms-2">
-                                        <span class="badge bg-light text-muted">7</span>
                                     </div>
                                 </a>
                             </li>
@@ -114,28 +119,16 @@
                                 <li class="nav-item" role="presentation">
                                     <a class="nav-link text-body active fw-semibold" data-bs-toggle="tab"
                                        href="#productnav-all" role="tab" aria-selected="true">
-                                        Todos los productos <span class="badge bg-danger-subtle text-danger align-middle rounded-pill ms-1">12</span>
+                                        Todos los productos
                                     </a>
                                 </li>
                                 
                             </ul>
                         </div>
-                        <div class="col-auto">
-                            <div id="selection-element">
-                                <div class="my-n1 d-flex align-items-center text-muted">
-                                    Select <div id="select-content" class="text-body fw-semibold px-1"></div> Result
-                                    <button type="button" class="btn btn-link link-danger p-0 ms-3"
-                                            data-bs-toggle="modal" data-bs-target="#removeItemModal">
-                                        Remove
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <!-- end card header -->
                 <div class="card-body">
-
                     <div class="tab-content text-muted">
                         <div class="tab-pane active" id="productnav-all" role="tabpanel">
                             <div id="table-product-list-all" class="table-card gridjs-border-none">
@@ -144,1255 +137,90 @@
                                         <table role="grid" class="gridjs-table" style="height: auto;">
                                             <thead class="gridjs-thead">
                                                 <tr class="gridjs-tr">
-                                                    <th data-column-id="#" class="gridjs-th gridjs-th-sort text-muted"
-                                                        tabindex="0" style="width: 40px;">
+                                                    <th data-column-id="#" class="gridjs-th gridjs-th-sort text-muted" tabindex="0" style="width: 40px;">
                                                         <div class="gridjs-th-content">#</div>
                                                     </th>
-                                                    <th data-column-id="product"
-                                                        class="gridjs-th gridjs-th-sort text-muted" tabindex="0"
-                                                        style="width: 360px;">
+                                                    <th data-column-id="product" class="gridjs-th gridjs-th-sort text-muted" tabindex="0" style="width: 360px;">
                                                         <div class="gridjs-th-content">Producto</div>
                                                     </th>
-                                                    <th data-column-id="stock"
-                                                        class="gridjs-th gridjs-th-sort text-muted" tabindex="0"
-                                                        style="width: 94px;">
+                                                    <th data-column-id="stock" class="gridjs-th gridjs-th-sort text-muted" tabindex="0" style="width: 94px;">
                                                         <div class="gridjs-th-content">Stock</div>
                                                     </th>
-                                                    <th data-column-id="price"
-                                                        class="gridjs-th gridjs-th-sort text-muted" tabindex="0"
-                                                        style="width: 101px;">
+                                                    <th data-column-id="price" class="gridjs-th gridjs-th-sort text-muted" tabindex="0" style="width: 101px;">
                                                         <div class="gridjs-th-content">Precio</div>
                                                     </th>
-                                                    <th data-column-id="orders"
-                                                        class="gridjs-th gridjs-th-sort text-muted" tabindex="0"
-                                                        style="width: 84px;">
-                                                        <div class="gridjs-th-content">Pedidos</div>
-                                                    </th>
-                                                    <th data-column-id="rating"
-                                                        class="gridjs-th gridjs-th-sort text-muted" tabindex="0"
-                                                        style="width: 105px;">
+                                                    <th data-column-id="rating" class="gridjs-th gridjs-th-sort text-muted" tabindex="0" style="width: 105px;">
                                                         <div class="gridjs-th-content">Calificación</div>
                                                     </th>
-                                                    <th data-column-id="published"
-                                                        class="gridjs-th gridjs-th-sort text-muted" tabindex="0"
-                                                        style="width: 220px;">
-                                                        <div class="gridjs-th-content">Publicado en</div>
+                                                    <th data-column-id="published" class="gridjs-th gridjs-th-sort text-muted" tabindex="0" style="width: 220px;">
+                                                        <div class="gridjs-th-content">Publicado</div>
                                                     </th>
-                                                    <th data-column-id="published"
-                                                        class="gridjs-th gridjs-th-sort text-muted" tabindex="0"
-                                                        style="width: 220px;">
+                                                    <th data-column-id="action" class="gridjs-th gridjs-th-sort text-muted" tabindex="0" style="width: 220px;">
                                                         <div class="gridjs-th-content"></div>
                                                     </th>
                                                 </tr>
                                             </thead>
                                             <tbody class="gridjs-tbody">
-                                                <tr class="gridjs-tr">
-                                                    <td data-column-id="#" class="gridjs-td">
-                                                        <span>
-                                                            <div class="form-check checkbox-product-list">
-                                                                <input class="form-check-input" type="checkbox" value="1"
-                                                                       id="checkbox-1"> <label class="form-check-label"
-                                                                                               for="checkbox-1"></label>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="product" class="gridjs-td">
-                                                        <span>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="flex-shrink-0 me-3">
-                                                                    <div class="avatar-sm bg-light rounded p-1">
-                                                                        <img src="https://mercaldas.vtexassets.com/arquivos/ids/230444/Aguacate-hass-un_123077.jpg?v=637840781617030000"
-                                                                             alt="" class="img-fluid d-block">
+                                                @if (_productos != null)
+                                                {
+                                                    foreach (var producto in _productos)
+                                                    {
+                                                        <tr class="gridjs-tr">
+                                                            <td data-column-id="#" class="gridjs-td">
+                                                                <span>
+                                                                    <div class="form-check checkbox-product-list">
+                                                                        <input class="form-check-input" type="checkbox" value="1" id="checkbox-@producto-Id">
+                                                                        <label class="form-check-label" for="checkbox-@producto.Id"></label>
+                                                                    </div>
+                                                                </span>
+                                                            </td>
+                                                            <td data-column-id="product" class="gridjs-td">
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="flex-shrink-0 me-3">
+                                                                        <div class="avatar-sm bg-light rounded p-1">
+                                                                            <img src="@producto.FotoUrl" alt="Sin imagen" style="width: 60px; height: 60px; object-fit: cover;" />
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="flex-grow-1">
+                                                                        <h5 class="fs-14 mb-1">
+                                                                            <a href="apps-ecommerce-product-details.html" class="text-body">
+                                                                                @producto.NombreProducto
+                                                                            </a>
+                                                                        </h5>
+                                                                        <p class="text-muted mb-0">
+                                                                            Categoría : <span class="fw-medium"> @_categorias.ListaParametrosDetallados.FirstOrDefault(_ => _.Id == producto.IdCategoria)?.Nombre</span>
+                                                                        </p>
                                                                     </div>
                                                                 </div>
-                                                                <div class="flex-grow-1">
-                                                                    <h5 class="fs-14 mb-1">
-                                                                        <a href="apps-ecommerce-product-details.html"
-                                                                           class="text-body">
-                                                                            Aguacate
-                                                                        </a>
-                                                                    </h5>
-                                                                    <p class="text-muted mb-0">
-                                                                        Categoría : <span class="fw-medium">Frutas</span>
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="stock" class="gridjs-td">300</td>
-                                                    <td data-column-id="price" class="gridjs-td">
-                                                        <span>$2000</span>
-                                                    </td>
-                                                    <td data-column-id="orders" class="gridjs-td">48</td>
-                                                    <td data-column-id="rating" class="gridjs-td">
-                                                        <span>
-                                                            <span class="badge bg-light text-body fs-12 fw-medium">
-                                                                <i class="mdi mdi-star text-warning me-1"></i>4.2
-                                                            </span>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="published" class="gridjs-td">
-                                                        <span>
-                                                            12 Oct,
-                                                            2021<small class="text-muted ms-1">10:05 AM</small>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="action" class="gridjs-td">
-                                                       <a href="/carrito">Agregar al carrito</a>
-                                                    </td>
-                                                </tr>
-                                                <tr class="gridjs-tr">
-                                                    <td data-column-id="#" class="gridjs-td">
-                                                        <span>
-                                                            <div class="form-check checkbox-product-list">
-                                                                <input class="form-check-input" type="checkbox" value="1"
-                                                                       id="checkbox-1"> <label class="form-check-label"
-                                                                                               for="checkbox-1"></label>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="product" class="gridjs-td">
-                                                        <span>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="flex-shrink-0 me-3">
-                                                                    <div class="avatar-sm bg-light rounded p-1">
-                                                                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTe2kS5KTJqHvC9KQjVwFXsTL8PTJryKhSB4g&s"
-                                                                             alt="" class="img-fluid d-block">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="flex-grow-1">
-                                                                    <h5 class="fs-14 mb-1">
-                                                                        <a href="apps-ecommerce-product-details.html"
-                                                                           class="text-body">
-                                                                            Fresas
-                                                                        </a>
-                                                                    </h5>
-                                                                    <p class="text-muted mb-0">
-                                                                        Categoría : <span class="fw-medium">Frutas</span>
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="stock" class="gridjs-td">300</td>
-                                                    <td data-column-id="price" class="gridjs-td">
-                                                        <span>$5000</span>
-                                                    </td>
-                                                    <td data-column-id="orders" class="gridjs-td">48</td>
-                                                    <td data-column-id="rating" class="gridjs-td">
-                                                        <span>
-                                                            <span class="badge bg-light text-body fs-12 fw-medium">
-                                                                <i class="mdi mdi-star text-warning me-1"></i>4.2
-                                                            </span>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="published" class="gridjs-td">
-                                                        <span>
-                                                            12 Oct,
-                                                            2021<small class="text-muted ms-1">10:05 AM</small>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="action" class="gridjs-td">
-                                                       <a href="/carrito">Agregar al carrito</a>
-                                                    </td>
-                                                </tr>
-                                                <tr class="gridjs-tr">
-                                                    <td data-column-id="#" class="gridjs-td">
-                                                        <span>
-                                                            <div class="form-check checkbox-product-list">
-                                                                <input class="form-check-input" type="checkbox" value="1"
-                                                                       id="checkbox-1"> <label class="form-check-label"
-                                                                                               for="checkbox-1"></label>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="product" class="gridjs-td">
-                                                        <span>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="flex-shrink-0 me-3">
-                                                                    <div class="avatar-sm bg-light rounded p-1">
-                                                                        <img src="https://news.umiamihealth.org/wp-content/uploads/2022/12/GettyImages_mangoes_1800px_463651383.jpg"
-                                                                             alt="" class="img-fluid d-block">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="flex-grow-1">
-                                                                    <h5 class="fs-14 mb-1">
-                                                                        <a href="apps-ecommerce-product-details.html"
-                                                                           class="text-body">
-                                                                            Mango
-                                                                        </a>
-                                                                    </h5>
-                                                                    <p class="text-muted mb-0">
-                                                                        Categoría : <span class="fw-medium">Frutas</span>
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="stock" class="gridjs-td">300</td>
-                                                    <td data-column-id="price" class="gridjs-td">
-                                                        <span>$3000</span>
-                                                    </td>
-                                                    <td data-column-id="orders" class="gridjs-td">48</td>
-                                                    <td data-column-id="rating" class="gridjs-td">
-                                                        <span>
-                                                            <span class="badge bg-light text-body fs-12 fw-medium">
-                                                                <i class="mdi mdi-star text-warning me-1"></i>4.2
-                                                            </span>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="published" class="gridjs-td">
-                                                        <span>
-                                                            12 Oct,
-                                                            2021<small class="text-muted ms-1">10:05 AM</small>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="action" class="gridjs-td">
-                                                       <a href="/carrito">Agregar al carrito</a>
-                                                    </td>
-                                                </tr>
-                                                <tr class="gridjs-tr">
-                                                    <td data-column-id="#" class="gridjs-td">
-                                                        <span>
-                                                            <div class="form-check checkbox-product-list">
-                                                                <input class="form-check-input" type="checkbox" value="1"
-                                                                       id="checkbox-1"> <label class="form-check-label"
-                                                                                               for="checkbox-1"></label>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="product" class="gridjs-td">
-                                                        <span>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="flex-shrink-0 me-3">
-                                                                    <div class="avatar-sm bg-light rounded p-1">
-                                                                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrpug2-aG-bsGAVBSnPGSuu8v6NwUeuGJeYg&s"
-                                                                             alt="" class="img-fluid d-block">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="flex-grow-1">
-                                                                    <h5 class="fs-14 mb-1">
-                                                                        <a href="apps-ecommerce-product-details.html"
-                                                                           class="text-body">
-                                                                            Uva
-                                                                        </a>
-                                                                    </h5>
-                                                                    <p class="text-muted mb-0">
-                                                                        Categoría : <span class="fw-medium">Frutas</span>
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="stock" class="gridjs-td">300</td>
-                                                    <td data-column-id="price" class="gridjs-td">
-                                                        <span>$2000</span>
-                                                    </td>
-                                                    <td data-column-id="orders" class="gridjs-td">48</td>
-                                                    <td data-column-id="rating" class="gridjs-td">
-                                                        <span>
-                                                            <span class="badge bg-light text-body fs-12 fw-medium">
-                                                                <i class="mdi mdi-star text-warning me-1"></i>4.2
-                                                            </span>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="published" class="gridjs-td">
-                                                        <span>
-                                                            12 Oct,
-                                                            2021<small class="text-muted ms-1">10:05 AM</small>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="action" class="gridjs-td">
-                                                       <a href="/carrito">Agregar al carrito</a>
-                                                    </td>
-                                                </tr>
-                                                <tr class="gridjs-tr">
-                                                    <td data-column-id="#" class="gridjs-td">
-                                                        <span>
-                                                            <div class="form-check checkbox-product-list">
-                                                                <input class="form-check-input" type="checkbox" value="1"
-                                                                       id="checkbox-1"> <label class="form-check-label"
-                                                                                               for="checkbox-1"></label>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="product" class="gridjs-td">
-                                                        <span>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="flex-shrink-0 me-3">
-                                                                    <div class="avatar-sm bg-light rounded p-1">
-                                                                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSoBzYX16cb8Yohudaftk2N4P0JilLgviFP7w&s"
-                                                                             alt="" class="img-fluid d-block">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="flex-grow-1">
-                                                                    <h5 class="fs-14 mb-1">
-                                                                        <a href="apps-ecommerce-product-details.html"
-                                                                           class="text-body">
-                                                                            Lechuga
-                                                                        </a>
-                                                                    </h5>
-                                                                    <p class="text-muted mb-0">
-                                                                        Categoría : <span class="fw-medium">Verduras</span>
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="stock" class="gridjs-td">300</td>
-                                                    <td data-column-id="price" class="gridjs-td">
-                                                        <span>$2000</span>
-                                                    </td>
-                                                    <td data-column-id="orders" class="gridjs-td">48</td>
-                                                    <td data-column-id="rating" class="gridjs-td">
-                                                        <span>
-                                                            <span class="badge bg-light text-body fs-12 fw-medium">
-                                                                <i class="mdi mdi-star text-warning me-1"></i>4.2
-                                                            </span>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="published" class="gridjs-td">
-                                                        <span>
-                                                            12 Oct,
-                                                            2021<small class="text-muted ms-1">10:05 AM</small>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="action" class="gridjs-td">
-                                                       <a href="/carrito">Agregar al carrito</a>
-                                                    </td>
-                                                </tr>
-                                                <tr class="gridjs-tr">
-                                                    <td data-column-id="#" class="gridjs-td">
-                                                        <span>
-                                                            <div class="form-check checkbox-product-list">
-                                                                <input class="form-check-input" type="checkbox" value="1"
-                                                                       id="checkbox-1"> <label class="form-check-label"
-                                                                                               for="checkbox-1"></label>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="product" class="gridjs-td">
-                                                        <span>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="flex-shrink-0 me-3">
-                                                                    <div class="avatar-sm bg-light rounded p-1">
-                                                                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRll5n4D6xBg0S8wcM5pYhoZe_EKYxca_xd4g&s"
-                                                                             alt="" class="img-fluid d-block">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="flex-grow-1">
-                                                                    <h5 class="fs-14 mb-1">
-                                                                        <a href="apps-ecommerce-product-details.html"
-                                                                           class="text-body">
-                                                                            Queso
-                                                                        </a>
-                                                                    </h5>
-                                                                    <p class="text-muted mb-0">
-                                                                        Categoría : <span class="fw-medium">Lacteos</span>
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="stock" class="gridjs-td">300</td>
-                                                    <td data-column-id="price" class="gridjs-td">
-                                                        <span>$2000</span>
-                                                    </td>
-                                                    <td data-column-id="orders" class="gridjs-td">48</td>
-                                                    <td data-column-id="rating" class="gridjs-td">
-                                                        <span>
-                                                            <span class="badge bg-light text-body fs-12 fw-medium">
-                                                                <i class="mdi mdi-star text-warning me-1"></i>4.2
-                                                            </span>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="published" class="gridjs-td">
-                                                        <span>
-                                                            12 Oct,
-                                                            2021<small class="text-muted ms-1">10:05 AM</small>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="action" class="gridjs-td">
-                                                       <a href="/carrito">Agregar al carrito</a>
-                                                    </td>
-                                                </tr>
-                                                <tr class="gridjs-tr">
-                                                    <td data-column-id="#" class="gridjs-td">
-                                                        <span>
-                                                            <div class="form-check checkbox-product-list">
-                                                                <input class="form-check-input" type="checkbox" value="1"
-                                                                       id="checkbox-1"> <label class="form-check-label"
-                                                                                               for="checkbox-1"></label>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="product" class="gridjs-td">
-                                                        <span>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="flex-shrink-0 me-3">
-                                                                    <div class="avatar-sm bg-light rounded p-1">
-                                                                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWT01LP5bzRxB5i6A02ESZOtwBdILuGBYh5g&s"
-                                                                             alt="" class="img-fluid d-block">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="flex-grow-1">
-                                                                    <h5 class="fs-14 mb-1">
-                                                                        <a href="apps-ecommerce-product-details.html"
-                                                                           class="text-body">
-                                                                            Arbejas
-                                                                        </a>
-                                                                    </h5>
-                                                                    <p class="text-muted mb-0">
-                                                                        Categoría : <span class="fw-medium">Frutas</span>
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="stock" class="gridjs-td">300</td>
-                                                    <td data-column-id="price" class="gridjs-td">
-                                                        <span>$2000</span>
-                                                    </td>
-                                                    <td data-column-id="orders" class="gridjs-td">48</td>
-                                                    <td data-column-id="rating" class="gridjs-td">
-                                                        <span>
-                                                            <span class="badge bg-light text-body fs-12 fw-medium">
-                                                                <i class="mdi mdi-star text-warning me-1"></i>4.2
-                                                            </span>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="published" class="gridjs-td">
-                                                        <span>
-                                                            12 Oct,
-                                                            2021<small class="text-muted ms-1">10:05 AM</small>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="action" class="gridjs-td">
-                                                       <a href="/carrito">Agregar al carrito</a>
-                                                    </td>
-                                                </tr>
-                                                <tr class="gridjs-tr">
-                                                    <td data-column-id="#" class="gridjs-td">
-                                                        <span>
-                                                            <div class="form-check checkbox-product-list">
-                                                                <input class="form-check-input" type="checkbox" value="1"
-                                                                       id="checkbox-1"> <label class="form-check-label"
-                                                                                               for="checkbox-1"></label>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="product" class="gridjs-td">
-                                                        <span>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="flex-shrink-0 me-3">
-                                                                    <div class="avatar-sm bg-light rounded p-1">
-                                                                        <img src="https://www.fructusterrum.com/wp-content/uploads/2020/07/cebolla-roja-1.jpg"
-                                                                             alt="" class="img-fluid d-block">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="flex-grow-1">
-                                                                    <h5 class="fs-14 mb-1">
-                                                                        <a href="apps-ecommerce-product-details.html"
-                                                                           class="text-body">
-                                                                            Cebolla
-                                                                        </a>
-                                                                    </h5>
-                                                                    <p class="text-muted mb-0">
-                                                                        Categoría : <span class="fw-medium">Frutas</span>
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="stock" class="gridjs-td">300</td>
-                                                    <td data-column-id="price" class="gridjs-td">
-                                                        <span>$2000</span>
-                                                    </td>
-                                                    <td data-column-id="orders" class="gridjs-td">48</td>
-                                                    <td data-column-id="rating" class="gridjs-td">
-                                                        <span>
-                                                            <span class="badge bg-light text-body fs-12 fw-medium">
-                                                                <i class="mdi mdi-star text-warning me-1"></i>4.2
-                                                            </span>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="published" class="gridjs-td">
-                                                        <span>
-                                                            12 Oct,
-                                                            2021<small class="text-muted ms-1">10:05 AM</small>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="action" class="gridjs-td">
-                                                       <a href="/carrito">Agregar al carrito</a>
-                                                    </td>
-                                                    <tr class="gridjs-tr">
-                                                    <td data-column-id="#" class="gridjs-td">
-                                                        <span>
-                                                            <div class="form-check checkbox-product-list">
-                                                                <input class="form-check-input" type="checkbox" value="1"
-                                                                       id="checkbox-1"> <label class="form-check-label"
-                                                                                               for="checkbox-1"></label>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="product" class="gridjs-td">
-                                                        <span>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="flex-shrink-0 me-3">
-                                                                    <div class="avatar-sm bg-light rounded p-1">
-                                                                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQaAXtZXW0NwXfeThZW9BbWaT36At6cOjfv4Q&s"
-                                                                             alt="" class="img-fluid d-block">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="flex-grow-1">
-                                                                    <h5 class="fs-14 mb-1">
-                                                                        <a href="apps-ecommerce-product-details.html"
-                                                                           class="text-body">
-                                                                            Papaya
-                                                                        </a>
-                                                                    </h5>
-                                                                    <p class="text-muted mb-0">
-                                                                        Categoría : <span class="fw-medium">Frutas</span>
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="stock" class="gridjs-td">300</td>
-                                                    <td data-column-id="price" class="gridjs-td">
-                                                        <span>$2000</span>
-                                                    </td>
-                                                    <td data-column-id="orders" class="gridjs-td">48</td>
-                                                    <td data-column-id="rating" class="gridjs-td">
-                                                        <span>
-                                                            <span class="badge bg-light text-body fs-12 fw-medium">
-                                                                <i class="mdi mdi-star text-warning me-1"></i>4.2
-                                                            </span>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="published" class="gridjs-td">
-                                                        <span>
-                                                            12 Oct,
-                                                            2021<small class="text-muted ms-1">10:05 AM</small>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="action" class="gridjs-td">
-                                                       <a href="/carrito">Agregar al carrito</a>
-                                                    </td>
-                                                </tr>
-                                                <tr class="gridjs-tr">
-                                                    <td data-column-id="#" class="gridjs-td">
-                                                        <span>
-                                                            <div class="form-check checkbox-product-list">
-                                                                <input class="form-check-input" type="checkbox" value="1"
-                                                                       id="checkbox-1"> <label class="form-check-label"
-                                                                                               for="checkbox-1"></label>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="product" class="gridjs-td">
-                                                        <span>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="flex-shrink-0 me-3">
-                                                                    <div class="avatar-sm bg-light rounded p-1">
-                                                                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWdEKO92wULz7Tq0O5rucDObVZ8pFCy4IAnA&s"
-                                                                             alt="" class="img-fluid d-block">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="flex-grow-1">
-                                                                    <h5 class="fs-14 mb-1">
-                                                                        <a href="apps-ecommerce-product-details.html"
-                                                                           class="text-body">
-                                                                            Durazno
-                                                                        </a>
-                                                                    </h5>
-                                                                    <p class="text-muted mb-0">
-                                                                        Categoría : <span class="fw-medium">Frutas</span>
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="stock" class="gridjs-td">300</td>
-                                                    <td data-column-id="price" class="gridjs-td">
-                                                        <span>$2000</span>
-                                                    </td>
-                                                    <td data-column-id="orders" class="gridjs-td">48</td>
-                                                    <td data-column-id="rating" class="gridjs-td">
-                                                        <span>
-                                                            <span class="badge bg-light text-body fs-12 fw-medium">
-                                                                <i class="mdi mdi-star text-warning me-1"></i>4.2
-                                                            </span>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="published" class="gridjs-td">
-                                                        <span>
-                                                            12 Oct,
-                                                            2021<small class="text-muted ms-1">10:05 AM</small>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="action" class="gridjs-td">
-                                                       <a href="/carrito">Agregar al carrito</a>
-                                                    </td>
-                                                </tr>
-                                                <tr class="gridjs-tr">
-                                                    <td data-column-id="#" class="gridjs-td">
-                                                        <span>
-                                                            <div class="form-check checkbox-product-list">
-                                                                <input class="form-check-input" type="checkbox" value="1"
-                                                                       id="checkbox-1"> <label class="form-check-label"
-                                                                                               for="checkbox-1"></label>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="product" class="gridjs-td">
-                                                        <span>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="flex-shrink-0 me-3">
-                                                                    <div class="avatar-sm bg-light rounded p-1">
-                                                                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRguxl-UsyxTA5RoygS5nszPIDRrPGKZamnXw&s"
-                                                                             alt="" class="img-fluid d-block">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="flex-grow-1">
-                                                                    <h5 class="fs-14 mb-1">
-                                                                        <a href="apps-ecommerce-product-details.html"
-                                                                           class="text-body">
-                                                                            Pera
-                                                                        </a>
-                                                                    </h5>
-                                                                    <p class="text-muted mb-0">
-                                                                        Categoría : <span class="fw-medium">Frutas</span>
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="stock" class="gridjs-td">300</td>
-                                                    <td data-column-id="price" class="gridjs-td">
-                                                        <span>$2000</span>
-                                                    </td>
-                                                    <td data-column-id="orders" class="gridjs-td">48</td>
-                                                    <td data-column-id="rating" class="gridjs-td">
-                                                        <span>
-                                                            <span class="badge bg-light text-body fs-12 fw-medium">
-                                                                <i class="mdi mdi-star text-warning me-1"></i>4.2
-                                                            </span>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="published" class="gridjs-td">
-                                                        <span>
-                                                            12 Oct,
-                                                            2021<small class="text-muted ms-1">10:05 AM</small>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="action" class="gridjs-td">
-                                                        <a href="/carrito">Agregar al carrito</a>
-                                                    </td>
-                                                </tr>
-                                                </tr>
+                                                            </td>
+                                                            <td data-column-id="stock" class="gridjs-td">@producto.StockDisponible</td>
+                                                            <td data-column-id="price" class="gridjs-td">
+                                                                <span>@producto.CostoUnitario?.ToString("C")</span>
+                                                            </td>
+                                                            <td data-column-id="rating" class="gridjs-td">
+                                                                <span class="badge bg-light text-body fs-12 fw-medium">
+                                                                    <i class="mdi mdi-star text-warning me-1"></i>4.2
+                                                                </span>
+                                                            </td>
+                                                            <td data-column-id="published" class="gridjs-td">
+                                                                <span>@producto.FechaAdicion</span>
+                                                            </td>
+                                                            <td data-column-id="action" class="gridjs-td">
+                                                                <a href="/carrito">Agregar al carrito</a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
                                             </tbody>
                                         </table>
-                                    </div>
-                                    <div class="gridjs-footer">
-                                        <div class="gridjs-pagination">
-                                            <div role="status" aria-live="polite" class="gridjs-summary"
-                                                 title="Page 1 of 2">
-                                                Mostrando <b>1</b> to <b>10</b> of <b>30</b> resultados
-                                            </div>
-                                            <div class="gridjs-pages">
-                                                <button tabindex="0" role="button" disabled=""
-                                                        title="Previous" aria-label="Previous"
-                                                        class="">
-                                                    Anterior
-                                                </button><button tabindex="0" role="button"
-                                                                 class="gridjs-currentPage" title="Page 1"
-                                                                 aria-label="Page 1">
-                                                    1
-                                                </button><button tabindex="0" role="button"
-                                                                 class="" title="Page 2" aria-label="Page 2">
-                                                    2
-                                                </button><button tabindex="0" role="button" title="Next" aria-label="Next"
-                                                                 class="">
-                                                    Siguiente
-                                                </button>
-                                            </div>
-                                        </div>
                                     </div>
                                     <div id="gridjs-temp" class="gridjs-temp"></div>
                                 </div>
                             </div>
-                        </div>
-                        <!-- end tab pane -->
-
-                        <div class="tab-pane" id="productnav-published" role="tabpanel">
-                            <div id="table-product-list-published" class="table-card gridjs-border-none">
-                                <div role="complementary" class="gridjs gridjs-container" style="width: 100%;">
-                                    <div class="gridjs-wrapper" style="height: auto;">
-                                        <table role="grid" class="gridjs-table" style="height: auto;">
-                                            <thead class="gridjs-thead">
-                                                <tr class="gridjs-tr">
-                                                    <th data-column-id="#" class="gridjs-th gridjs-th-sort text-muted"
-                                                        tabindex="0" style="width: 40px;">
-                                                        <div class="gridjs-th-content">#</div><button tabindex="-1"
-                                                                                                      aria-label="Sort column ascending"
-                                                                                                      title="Sort column ascending"
-                                                                                                      class="gridjs-sort gridjs-sort-neutral"></button>
-                                                    </th>
-                                                    <th data-column-id="product"
-                                                        class="gridjs-th gridjs-th-sort text-muted" tabindex="0"
-                                                        style="width: 360px;">
-                                                        <div class="gridjs-th-content">Product</div><button tabindex="-1" aria-label="Sort column ascending"
-                                                                                                            title="Sort column ascending"
-                                                                                                            class="gridjs-sort gridjs-sort-neutral"></button>
-                                                    </th>
-                                                    <th data-column-id="stock"
-                                                        class="gridjs-th gridjs-th-sort text-muted" tabindex="0"
-                                                        style="width: 94px;">
-                                                        <div class="gridjs-th-content">Stock</div><button tabindex="-1"
-                                                                                                          aria-label="Sort column ascending"
-                                                                                                          title="Sort column ascending"
-                                                                                                          class="gridjs-sort gridjs-sort-neutral"></button>
-                                                    </th>
-                                                    <th data-column-id="price"
-                                                        class="gridjs-th gridjs-th-sort text-muted" tabindex="0"
-                                                        style="width: 101px;">
-                                                        <div class="gridjs-th-content">Price</div><button tabindex="-1"
-                                                                                                          aria-label="Sort column ascending"
-                                                                                                          title="Sort column ascending"
-                                                                                                          class="gridjs-sort gridjs-sort-neutral"></button>
-                                                    </th>
-                                                    <th data-column-id="orders"
-                                                        class="gridjs-th gridjs-th-sort text-muted" tabindex="0"
-                                                        style="width: 84px;">
-                                                        <div class="gridjs-th-content">Orders</div><button tabindex="-1"
-                                                                                                           aria-label="Sort column ascending"
-                                                                                                           title="Sort column ascending"
-                                                                                                           class="gridjs-sort gridjs-sort-neutral"></button>
-                                                    </th>
-                                                    <th data-column-id="rating"
-                                                        class="gridjs-th gridjs-th-sort text-muted" tabindex="0"
-                                                        style="width: 105px;">
-                                                        <div class="gridjs-th-content">Rating</div><button tabindex="-1"
-                                                                                                           aria-label="Sort column ascending"
-                                                                                                           title="Sort column ascending"
-                                                                                                           class="gridjs-sort gridjs-sort-neutral"></button>
-                                                    </th>
-                                                    <th data-column-id="published"
-                                                        class="gridjs-th gridjs-th-sort text-muted" tabindex="0"
-                                                        style="width: 220px;">
-                                                        <div class="gridjs-th-content">Published</div><button tabindex="-1" aria-label="Sort column ascending"
-                                                                                                              title="Sort column ascending"
-                                                                                                              class="gridjs-sort gridjs-sort-neutral"></button>
-                                                    </th>
-                                                    <th data-column-id="action"
-                                                        class="gridjs-th gridjs-th-sort text-muted" tabindex="0"
-                                                        style="width: 80px;">
-                                                        <div class="gridjs-th-content">Action</div><button tabindex="-1"
-                                                                                                           aria-label="Sort column ascending"
-                                                                                                           title="Sort column ascending"
-                                                                                                           class="gridjs-sort gridjs-sort-neutral"></button>
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="gridjs-tbody">
-                                                <tr class="gridjs-tr">
-                                                    <td data-column-id="#" class="gridjs-td">
-                                                        <span>
-                                                            <div class="form-check checkbox-product-list">
-                                                                <input class="form-check-input" type="checkbox"
-                                                                       value="undefined" id="checkboxpublished-undefined">
-                                                                <label class="form-check-label"
-                                                                       for="checkbox-undefined"></label>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="product" class="gridjs-td">
-                                                        <span>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="flex-shrink-0 me-3">
-                                                                    <div class="avatar-sm bg-light rounded p-1">
-                                                                        <img src="assetsMainSite/images/products/img-2.png"
-                                                                             alt="" class="img-fluid d-block">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="flex-grow-1">
-                                                                    <h5 class="fs-14 mb-1">
-                                                                        <a href="apps-ecommerce-product-details.html"
-                                                                           class="text-body">
-                                                                            Urban Ladder Pashe
-                                                                            Chair
-                                                                        </a>
-                                                                    </h5>
-                                                                    <p class="text-muted mb-0">
-                                                                        Category : <span class="fw-medium">Furniture</span>
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="stock" class="gridjs-td">06</td>
-                                                    <td data-column-id="price" class="gridjs-td">
-                                                        <span>$160.00</span>
-                                                    </td>
-                                                    <td data-column-id="orders" class="gridjs-td">30</td>
-                                                    <td data-column-id="rating" class="gridjs-td">
-                                                        <span>
-                                                            <span class="badge bg-light text-body fs-12 fw-medium">
-                                                                <i class="mdi mdi-star text-warning me-1"></i>4.3
-                                                            </span>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="published" class="gridjs-td">
-                                                        <span>
-                                                            06 Jan,
-                                                            2021<small class="text-muted ms-1">01:31 PM</small>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="action" class="gridjs-td">
-                                                        <span>
-                                                            <div class="dropdown">
-                                                                <button class="btn btn-soft-secondary btn-sm dropdown"
-                                                                        type="button" data-bs-toggle="dropdown"
-                                                                        aria-expanded="false">
-                                                                    <i class="ri-more-fill"></i>
-                                                                </button>
-                                                                <ul class="dropdown-menu dropdown-menu-end">
-                                                                    <li>
-                                                                        <a class="dropdown-item"
-                                                                           href="apps-ecommerce-product-details.html">
-                                                                            <i class="ri-eye-fill align-bottom me-2 text-muted"></i>
-                                                                            View
-                                                                        </a>
-                                                                    </li>
-                                                                    <li>
-                                                                        <a class="dropdown-item"
-                                                                           href="apps-ecommerce-add-product.html">
-                                                                            <i class="ri-pencil-fill align-bottom me-2 text-muted"></i>
-                                                                            Edit
-                                                                        </a>
-                                                                    </li>
-                                                                    <li class="dropdown-divider"></li>
-                                                                    <li>
-                                                                        <a class="dropdown-item remove-list" href="#"
-                                                                           data-id="undefined" data-bs-toggle="modal"
-                                                                           data-bs-target="#removeItemModal">
-                                                                            <i class="ri-delete-bin-fill align-bottom me-2 text-muted"></i>
-                                                                            Delete
-                                                                        </a>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                                <tr class="gridjs-tr">
-                                                    <td data-column-id="#" class="gridjs-td">
-                                                        <span>
-                                                            <div class="form-check checkbox-product-list">
-                                                                <input class="form-check-input" type="checkbox"
-                                                                       value="undefined" id="checkboxpublished-undefined">
-                                                                <label class="form-check-label"
-                                                                       for="checkbox-undefined"></label>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="product" class="gridjs-td">
-                                                        <span>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="flex-shrink-0 me-3">
-                                                                    <div class="avatar-sm bg-light rounded p-1">
-                                                                        <img src="assetsMainSite/images/products/img-6.png"
-                                                                             alt="" class="img-fluid d-block">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="flex-grow-1">
-                                                                    <h5 class="fs-14 mb-1">
-                                                                        <a href="apps-ecommerce-product-details.html"
-                                                                           class="text-body">
-                                                                            Half Sleeve T-Shirts
-                                                                            (Blue)
-                                                                        </a>
-                                                                    </h5>
-                                                                    <p class="text-muted mb-0">
-                                                                        Category : <span class="fw-medium">Fashion</span>
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="stock" class="gridjs-td">15</td>
-                                                    <td data-column-id="price" class="gridjs-td">
-                                                        <span>$125.00</span>
-                                                    </td>
-                                                    <td data-column-id="orders" class="gridjs-td">48</td>
-                                                    <td data-column-id="rating" class="gridjs-td">
-                                                        <span>
-                                                            <span class="badge bg-light text-body fs-12 fw-medium">
-                                                                <i class="mdi mdi-star text-warning me-1"></i>4.2
-                                                            </span>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="published" class="gridjs-td">
-                                                        <span>
-                                                            12 Oct,
-                                                            2021<small class="text-muted ms-1">04:55 PM</small>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="action" class="gridjs-td">
-                                                        <span>
-                                                            <div class="dropdown">
-                                                                <button class="btn btn-soft-secondary btn-sm dropdown"
-                                                                        type="button" data-bs-toggle="dropdown"
-                                                                        aria-expanded="false">
-                                                                    <i class="ri-more-fill"></i>
-                                                                </button>
-                                                                <ul class="dropdown-menu dropdown-menu-end">
-                                                                    <li>
-                                                                        <a class="dropdown-item"
-                                                                           href="apps-ecommerce-product-details.html">
-                                                                            <i class="ri-eye-fill align-bottom me-2 text-muted"></i>
-                                                                            View
-                                                                        </a>
-                                                                    </li>
-                                                                    <li>
-                                                                        <a class="dropdown-item"
-                                                                           href="apps-ecommerce-add-product.html">
-                                                                            <i class="ri-pencil-fill align-bottom me-2 text-muted"></i>
-                                                                            Edit
-                                                                        </a>
-                                                                    </li>
-                                                                    <li class="dropdown-divider"></li>
-                                                                    <li>
-                                                                        <a class="dropdown-item remove-list" href="#"
-                                                                           data-id="undefined" data-bs-toggle="modal"
-                                                                           data-bs-target="#removeItemModal">
-                                                                            <i class="ri-delete-bin-fill align-bottom me-2 text-muted"></i>
-                                                                            Delete
-                                                                        </a>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                                <tr class="gridjs-tr">
-                                                    <td data-column-id="#" class="gridjs-td">
-                                                        <span>
-                                                            <div class="form-check checkbox-product-list">
-                                                                <input class="form-check-input" type="checkbox"
-                                                                       value="undefined" id="checkboxpublished-undefined">
-                                                                <label class="form-check-label"
-                                                                       for="checkbox-undefined"></label>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="product" class="gridjs-td">
-                                                        <span>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="flex-shrink-0 me-3">
-                                                                    <div class="avatar-sm bg-light rounded p-1">
-                                                                        <img src="assetsMainSite/images/products/img-4.png"
-                                                                             alt="" class="img-fluid d-block">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="flex-grow-1">
-                                                                    <h5 class="fs-14 mb-1">
-                                                                        <a href="apps-ecommerce-product-details.html"
-                                                                           class="text-body">
-                                                                            Fabric Dual Tone Living
-                                                                            Room Chair
-                                                                        </a>
-                                                                    </h5>
-                                                                    <p class="text-muted mb-0">
-                                                                        Category : <span class="fw-medium">Furniture</span>
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="stock" class="gridjs-td">15</td>
-                                                    <td data-column-id="price" class="gridjs-td">
-                                                        <span>$140.00</span>
-                                                    </td>
-                                                    <td data-column-id="orders" class="gridjs-td">40</td>
-                                                    <td data-column-id="rating" class="gridjs-td">
-                                                        <span>
-                                                            <span class="badge bg-light text-body fs-12 fw-medium">
-                                                                <i class="mdi mdi-star text-warning me-1"></i>4.2
-                                                            </span>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="published" class="gridjs-td">
-                                                        <span>
-                                                            19 Apr,
-                                                            2021<small class="text-muted ms-1">02:51 PM</small>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="action" class="gridjs-td">
-                                                        <span>
-                                                            <div class="dropdown">
-                                                                <button class="btn btn-soft-secondary btn-sm dropdown"
-                                                                        type="button" data-bs-toggle="dropdown"
-                                                                        aria-expanded="false">
-                                                                    <i class="ri-more-fill"></i>
-                                                                </button>
-                                                                <ul class="dropdown-menu dropdown-menu-end">
-                                                                    <li>
-                                                                        <a class="dropdown-item"
-                                                                           href="apps-ecommerce-product-details.html">
-                                                                            <i class="ri-eye-fill align-bottom me-2 text-muted"></i>
-                                                                            View
-                                                                        </a>
-                                                                    </li>
-                                                                    <li>
-                                                                        <a class="dropdown-item"
-                                                                           href="apps-ecommerce-add-product.html">
-                                                                            <i class="ri-pencil-fill align-bottom me-2 text-muted"></i>
-                                                                            Edit
-                                                                        </a>
-                                                                    </li>
-                                                                    <li class="dropdown-divider"></li>
-                                                                    <li>
-                                                                        <a class="dropdown-item remove-list" href="#"
-                                                                           data-id="undefined" data-bs-toggle="modal"
-                                                                           data-bs-target="#removeItemModal">
-                                                                            <i class="ri-delete-bin-fill align-bottom me-2 text-muted"></i>
-                                                                            Delete
-                                                                        </a>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                                <tr class="gridjs-tr">
-                                                    <td data-column-id="#" class="gridjs-td">
-                                                        <span>
-                                                            <div class="form-check checkbox-product-list">
-                                                                <input class="form-check-input" type="checkbox"
-                                                                       value="undefined" id="checkboxpublished-undefined">
-                                                                <label class="form-check-label"
-                                                                       for="checkbox-undefined"></label>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="product" class="gridjs-td">
-                                                        <span>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="flex-shrink-0 me-3">
-                                                                    <div class="avatar-sm bg-light rounded p-1">
-                                                                        <img src="assetsMainSite/images/products/img-4.png"
-                                                                             alt="" class="img-fluid d-block">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="flex-grow-1">
-                                                                    <h5 class="fs-14 mb-1">
-                                                                        <a href="apps-ecommerce-product-details.html"
-                                                                           class="text-body">
-                                                                            350 ml Glass Grocery
-                                                                            Container
-                                                                        </a>
-                                                                    </h5>
-                                                                    <p class="text-muted mb-0">
-                                                                        Category : <span class="fw-medium">Grocery</span>
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="stock" class="gridjs-td">10</td>
-                                                    <td data-column-id="price" class="gridjs-td">
-                                                        <span>$125.00</span>
-                                                    </td>
-                                                    <td data-column-id="orders" class="gridjs-td">48</td>
-                                                    <td data-column-id="rating" class="gridjs-td">
-                                                        <span>
-                                                            <span class="badge bg-light text-body fs-12 fw-medium">
-                                                                <i class="mdi mdi-star text-warning me-1"></i>4.5
-                                                            </span>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="published" class="gridjs-td">
-                                                        <span>
-                                                            26 Mar,
-                                                            2021<small class="text-muted ms-1">11:40 AM</small>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="action" class="gridjs-td">
-                                                        <span>
-                                                            <div class="dropdown">
-                                                                <button class="btn btn-soft-secondary btn-sm dropdown"
-                                                                        type="button" data-bs-toggle="dropdown"
-                                                                        aria-expanded="false">
-                                                                    <i class="ri-more-fill"></i>
-                                                                </button>
-                                                                <ul class="dropdown-menu dropdown-menu-end">
-                                                                    <li>
-                                                                        <a class="dropdown-item"
-                                                                           href="apps-ecommerce-product-details.html">
-                                                                            <i class="ri-eye-fill align-bottom me-2 text-muted"></i>
-                                                                            View
-                                                                        </a>
-                                                                    </li>
-                                                                    <li>
-                                                                        <a class="dropdown-item"
-                                                                           href="apps-ecommerce-add-product.html">
-                                                                            <i class="ri-pencil-fill align-bottom me-2 text-muted"></i>
-                                                                            Edit
-                                                                        </a>
-                                                                    </li>
-                                                                    <li class="dropdown-divider"></li>
-                                                                    <li>
-                                                                        <a class="dropdown-item remove-list" href="#"
-                                                                           data-id="undefined" data-bs-toggle="modal"
-                                                                           data-bs-target="#removeItemModal">
-                                                                            <i class="ri-delete-bin-fill align-bottom me-2 text-muted"></i>
-                                                                            Delete
-                                                                        </a>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                                <tr class="gridjs-tr">
-                                                    <td data-column-id="#" class="gridjs-td">
-                                                        <span>
-                                                            <div class="form-check checkbox-product-list">
-                                                                <input class="form-check-input" type="checkbox"
-                                                                       value="undefined" id="checkboxpublished-undefined">
-                                                                <label class="form-check-label"
-                                                                       for="checkbox-undefined"></label>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="product" class="gridjs-td">
-                                                        <span>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="flex-shrink-0 me-3">
-                                                                    <div class="avatar-sm bg-light rounded p-1">
-                                                                        <img src="assetsMainSite/images/products/img-5.png"
-                                                                             alt="" class="img-fluid d-block">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="flex-grow-1">
-                                                                    <h5 class="fs-14 mb-1">
-                                                                        <a href="apps-ecommerce-product-details.html"
-                                                                           class="text-body">
-                                                                            Crux Motorsports
-                                                                            Helmet
-                                                                        </a>
-                                                                    </h5>
-                                                                    <p class="text-muted mb-0">
-                                                                        Category : <span class="fw-medium">
-                                                                            Automotive
-                                                                            Accessories
-                                                                        </span>
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="stock" class="gridjs-td">08</td>
-                                                    <td data-column-id="price" class="gridjs-td">
-                                                        <span>$135.00</span>
-                                                    </td>
-                                                    <td data-column-id="orders" class="gridjs-td">55</td>
-                                                    <td data-column-id="rating" class="gridjs-td">
-                                                        <span>
-                                                            <span class="badge bg-light text-body fs-12 fw-medium">
-                                                                <i class="mdi mdi-star text-warning me-1"></i>4.4
-                                                            </span>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="published" class="gridjs-td">
-                                                        <span>
-                                                            30 Mar,
-                                                            2021<small class="text-muted ms-1">09:42 AM</small>
-                                                        </span>
-                                                    </td>
-                                                    <td data-column-id="action" class="gridjs-td">
-                                                        <span>
-                                                            <div class="dropdown">
-                                                                <button class="btn btn-soft-secondary btn-sm dropdown"
-                                                                        type="button" data-bs-toggle="dropdown"
-                                                                        aria-expanded="false">
-                                                                    <i class="ri-more-fill"></i>
-                                                                </button>
-                                                                <ul class="dropdown-menu dropdown-menu-end">
-                                                                    <li>
-                                                                        <a class="dropdown-item"
-                                                                           href="apps-ecommerce-product-details.html">
-                                                                            <i class="ri-eye-fill align-bottom me-2 text-muted"></i>
-                                                                            View
-                                                                        </a>
-                                                                    </li>
-                                                                    <li>
-                                                                        <a class="dropdown-item"
-                                                                           href="apps-ecommerce-add-product.html">
-                                                                            <i class="ri-pencil-fill align-bottom me-2 text-muted"></i>
-                                                                            Edit
-                                                                        </a>
-                                                                    </li>
-                                                                    <li class="dropdown-divider"></li>
-                                                                    <li>
-                                                                        <a class="dropdown-item remove-list" href="#"
-                                                                           data-id="undefined" data-bs-toggle="modal"
-                                                                           data-bs-target="#removeItemModal">
-                                                                            <i class="ri-delete-bin-fill align-bottom me-2 text-muted"></i>
-                                                                            Delete
-                                                                        </a>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div class="gridjs-footer">
-                                        <div class="gridjs-pagination">
-                                            <div role="status" aria-live="polite" class="gridjs-summary"
-                                                 title="Page 1 of 1">
-                                                Showing <b>1</b> to <b>5</b> of <b>5</b> results
-                                            </div>
-                                            <div class="gridjs-pages">
-                                                <button tabindex="0" role="button" disabled=""
-                                                        title="Previous" aria-label="Previous"
-                                                        class="">
-                                                    Previous
-                                                </button><button tabindex="0" role="button"
-                                                                 class="gridjs-currentPage" title="Page 1"
-                                                                 aria-label="Page 1">
-                                                    1
-                                                </button><button tabindex="0" role="button"
-                                                                 disabled="" title="Next" aria-label="Next" class="">
-                                                    Next
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div id="gridjs-temp" class="gridjs-temp"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- end tab pane -->
-
-                        <div class="tab-pane" id="productnav-draft" role="tabpanel">
-                            <div class="py-4 text-center">
-                                <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="loop"
-                                           colors="primary:#405189,secondary:#0ab39c" style="width:72px;height:72px">
-                                </lord-icon>
-                                <h5 class="mt-4">Sorry! No Result Found</h5>
-                            </div>
-                        </div>
-                        <!-- end tab pane -->
-                    </div>
-                    <!-- end tab content -->
-
-                </div>
+                        </div> <!-- end tab pane -->
+                    </div> <!-- end tab content -->
+                </div> <!-- end card body -->
+                <!-- end tab content -->
                 <!-- end card body -->
             </div>
             <!-- end card -->
@@ -1403,17 +231,60 @@
 <!-- end row -->
 
 @code{
-    protected override async Task OnAfterRenderAsync(bool firstRender){
+    private bool _isLoading = true;
+
+    private RadzenDataGrid<Producto> _productosGrid;
+
+    [CascadingParameter]
+    protected UserSession? UserSession { get; set; }
+
+    private IEnumerable<Usuario> _mercados;
+    private IEnumerable<Producto> _productos;
+
+    private ParametroGeneral _categorias;
+    private Producto _productoToInsert;
+    private Producto _productoToUpdate;
+
+    private IEnumerable<long> _selectedCategoriaIds;
+    private IEnumerable<long> _selectedMercadoIds;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
         try
         {
             if (firstRender)
             {
-                
+                await LoadData();
             }
         }
-        catch(Exception exe)
+        catch (Exception exe)
         {
-            
+            _logger.LogError(exe, "Error al consultar usuarios");
+            await _jsRuntime.NotiflixNotifyAlert("Error interno del servidor", NotiflixMessageType.failure);
         }
     }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        await Task.Yield();
+
+        var tCategorias = _parametroGeneralService.ConsultarParametroGeneralById(2);
+        var tMercados = _userService.GetUsuarios();
+        var tProductos = _gaiaCaporalService.GetProductos();
+
+        await Task.WhenAll(tCategorias, tMercados, tProductos);
+
+        _categorias = await tCategorias;
+        _productos = await tProductos;
+        _mercados = await tMercados;
+
+        _productos = _productos.OrderByDescending(u => u.FechaAdicion);
+
+        _isLoading = false;
+        StateHasChanged();
+    }
 }
+

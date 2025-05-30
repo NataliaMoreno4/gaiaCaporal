@@ -100,6 +100,15 @@
                                 @producto.Descripcion
                             </Template>
                         </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Producto" Property="CostoUnitario" Title="CostoUnitario">
+                            <EditTemplate Context="producto">
+                                <input type="number" class="form-control" @bind-value="producto.CostoUnitario"
+                                       placeholder="Descripción" />
+                            </EditTemplate>
+                            <Template Context="producto">
+                                @producto.CostoUnitario
+                            </Template>
+                        </RadzenDataGridColumn>
                         <RadzenDataGridColumn TItem="Producto" Property="IdCategoria" Title="Categoría"
                             Type="typeof(IEnumerable<long>)" FilterValue="@_selectedCategoriaIds"
                             FilterOperator="FilterOperator.Contains" LogicalFilterOperator="LogicalFilterOperator.Or">
@@ -120,6 +129,29 @@
 
                             <Template Context="producto">
                                 @_categorias.ListaParametrosDetallados.FirstOrDefault(_ => _.Id == producto.IdCategoria)?.Nombre
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Producto" Property="FotoUrl" Title="Foto">
+                            <EditTemplate Context="producto">
+                                <input type="text" class="form-control" @bind-value="producto.FotoUrl" placeholder="URL de la imagen" />
+                            </EditTemplate>
+                            <Template Context="producto">
+                                @if (!string.IsNullOrWhiteSpace(producto.FotoUrl))
+                                {
+                                    <img src="@producto.FotoUrl" alt="Foto" style="width: 60px; height: 60px; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <span>Sin imagen</span>
+                                }
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Producto" Property="StockDisponible" Title="Stock Disponible">
+                            <EditTemplate Context="producto">
+                                <input type="number" class="form-control" @bind-value="producto.StockDisponible" min="0" />
+                            </EditTemplate>
+                            <Template Context="producto">
+                                @producto.StockDisponible
                             </Template>
                         </RadzenDataGridColumn>
                         <RadzenDataGridColumn TItem="Producto" Property="IdMercado" Title="Mercado"

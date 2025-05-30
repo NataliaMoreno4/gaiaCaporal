@@ -1289,7 +1289,7 @@ namespace PlantillaBlazor.Persistence.Migrations
                             Apellidos = "Administrador",
                             Celular = "",
                             Clave = "$2a$10$shiRv6MY8eRdGrMd./ISYOSdhkxcfEEulDJQeVzF8JTGUJi/jK1Pq",
-                            Email = "leonardo.arias@excellentiam.co",
+                            Email = "natmorenos42@gmail.com",
                             FechaAdicion = new DateTime(2024, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IdRol = 1L,
                             IsActive = true,

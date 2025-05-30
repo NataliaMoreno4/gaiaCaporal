@@ -1,7 +1,20 @@
 ﻿@page "/carrito"
+@using PlantillaBlazor.Domain.Entities.GaiaCaporal
+@using PlantillaBlazor.Domain.Entities.Parametrizacion
+@using PlantillaBlazor.Domain.Entities.Perfilamiento
+@using PlantillaBlazor.Services.Interfaces.GaiaCaporal
+@using PlantillaBlazor.Services.Interfaces.Parametrizacion
+@using PlantillaBlazor.Services.Interfaces.Perfilamiento
+
+@inject ILogger<Carrito> _logger
+@inject IUsuarioService _userService
+@inject IGaiaCaporalService _gaiaCaporalService
+@inject IParametroGeneralService _parametroGeneralService
 
 @attribute [PageInfo(Perfilable = false)]
 
+
+<body> 
 <!-- start page title -->
 <div class="row">
     <div class="col-12">
@@ -10,7 +23,7 @@
 
             <div class="page-title-right">
                 <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Gaia</a></li>
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Gaia Caporal</a></li>
                     <li class="breadcrumb-item active">Productos</li>
                 </ol>
             </div>
@@ -20,12 +33,13 @@
 </div>
 <!-- end page title -->
 
+
 <div class="row mb-3">
     <div class="col-xl-8">
         <div class="row align-items-center gy-3 mb-3">
             <div class="col-sm">
                 <div>
-                    <h5 class="fs-14 mb-0">Tu carrito (03 productos)</h5>
+                    <h5 class="fs-14 mb-0">Tu carrito (@_productos?.Count() productos)</h5>
                 </div>
             </div>
             <div class="col-sm-auto">
@@ -33,161 +47,67 @@
             </div>
         </div>
 
-        <div class="card product">
-            <div class="card-body">
-                <div class="row gy-3">
-                    <div class="col-sm-auto">
-                        <div class="avatar-lg bg-light rounded p-1">
-                            <img src="https://mercaldas.vtexassets.com/arquivos/ids/230444/Aguacate-hass-un_123077.jpg?v=637840781617030000" alt="" class="img-fluid d-block">
+        @if (_productos != null && _productos.Any())
+        {
+            foreach (var producto in _productos)
+            {
+                <div class="card product mb-3">
+                    <div class="card-body">
+                        <div class="row gy-3">
+                            <div class="col-sm-auto">
+                                <div class="avatar-lg bg-light rounded p-1">
+                                    <img src="@producto.FotoUrl" alt="@producto.NombreProducto" class="img-fluid d-block" />
+                                </div>
+                            </div>
+                            <div class="col-sm">
+                                <h5 class="fs-14 text-truncate">
+                                    <a href="/Home" class="text-body">@producto.NombreProducto</a>
+                                </h5>
+
+                                <div class="input-step">
+                                    <button type="button" class="minus">–</button>
+                                    <input type="number" class="product-quantity"
+                                           value="1" min="0" max="@producto.StockDisponible"
+                                           data-precio="@producto.CostoUnitario" />
+                                    <button type="button" class="plus">+</button>
+                                </div>
+                            </div>
+                            <div class="col-sm-auto">
+                                <div class="text-lg-end">
+                                    <p class="text-muted mb-1">Valor unitario:</p>
+                                    <h5 class="fs-14">$<span class="product-price">@producto.CostoUnitario?.ToString("N0")</span></h5>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-sm">
-                        <h5 class="fs-14 text-truncate"><a href="/Home" class="text-body">Aguacate</a></h5>
+                    <div class="card-footer">
+                        <div class="row align-items-center gy-3">
+                            <div class="col-sm-auto">
+                                <div class="d-flex align-items-center gap-2 text-muted">
+                                    <div>Total:</div>
+                                    <h5 class="fs-14 mb-0">
+                                        $<span class="product-line-price">@producto.CostoUnitario?.ToString("N0")</span> <!-- Aquí puedes multiplicar por cantidad si la manejas -->
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
                         
 
-                        <div class="input-step">
-                            <button type="button" class="minus">–</button>
-                            <input type="number" class="product-quantity" value="2" min="0" max="100">
-                            <button type="button" class="plus">+</button>
-                        </div>
-                    </div>
-                    <div class="col-sm-auto">
-                        <div class="text-lg-end">
-                            <p class="text-muted mb-1">Valor:</p>
-                            <h5 class="fs-14">$<span id="ticket_price" class="product-price">2.000</span></h5>
-                        </div>
                     </div>
                 </div>
+            }
+
+            <div class="text-end mb-4">
+                <a href="#" class="btn btn-success btn-label right ms-auto">
+                    <i class="ri-arrow-right-line label-icon align-bottom fs-16 ms-2"></i> Ir a pagar
+                </a>
             </div>
-            <!-- card body -->
-            <div class="card-footer">
-                <div class="row align-items-center gy-3">
-                    <div class="col-sm">
-                        <div class="d-flex flex-wrap my-n1">
-                            <div>
-                                <a href="#" class="d-block text-body p-1 px-2" data-bs-toggle="modal" data-bs-target="#EliminarItemModal"><i class="ri-delete-bin-fill text-muted align-bottom me-1"></i> Eliminar</a>
-                            </div>
-                            
-                        </div>
-                    </div>
-                    <div class="col-sm-auto">
-                        <div class="d-flex align-items-center gap-2 text-muted">
-                            <div>Total :</div>
-                            <h5 class="fs-14 mb-0">$<span class="product-line-price">6.000</span></h5>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- end card footer -->
-        </div>
-        <!-- end card -->
-
-        <div class="card product">
-            <div class="card-body">
-                <div class="row gy-3">
-                    <div class="col-sm-auto">
-                        <div class="avatar-lg bg-light rounded p-1">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTe2kS5KTJqHvC9KQjVwFXsTL8PTJryKhSB4g&s" alt="" class="img-fluid d-block">
-                        </div>
-                    </div>
-                    <div class="col-sm">
-                        <h5 class="fs-14 text-truncate"><a href="/Home" class="text-body">Fresas</a></h5>
-
-                        
-
-                        <div class="input-step">
-                            <button type="button" class="minus">–</button>
-                            <input type="number" class="product-quantity" value="1" min="0" max="100">
-                            <button type="button" class="plus">+</button>
-                        </div>
-                    </div>
-                    <div class="col-sm-auto">
-                        <div class="text-lg-end">
-                            <p class="text-muted mb-1">Valor:</p>
-                            <h5 class="fs-14">$<span class="product-price">3.000</span></h5>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- card body -->
-            <div class="card-footer">
-                <div class="row align-items-center gy-3">
-                    <div class="col-sm">
-                        <div class="d-flex flex-wrap my-n1">
-                            <div>
-                                <a href="#" class="d-block text-body p-1 px-2" data-bs-toggle="modal" data-bs-target="#EliminarItemModal"><i class="ri-delete-bin-fill text-muted align-bottom me-1"></i> Eliminar</a>
-                            </div>
-                            
-                        </div>
-                    </div>
-                    <div class="col-sm-auto">
-                        <div class="d-flex align-items-center gap-2 text-muted">
-                            <div>Total :</div>
-                            <h5 class="fs-14 mb-0">$<span class="product-line-price">3.000</span></h5>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- end card footer -->
-        </div>
-        <!-- end card -->
-
-        <div class="card product">
-            <div class="card-body">
-                <div class="row gy-3">
-                    <div class="col-sm-auto">
-                        <div class="avatar-lg bg-light rounded p-1">
-                            <img src="https://news.umiamihealth.org/wp-content/uploads/2022/12/GettyImages_mangoes_1800px_463651383.jpg" alt="" class="img-fluid d-block">
-                        </div>
-                    </div>
-                    <div class="col-sm">
-                        <h5 class="fs-14 text-truncate"><a href="ecommerce-product-detail.html" class="text-body">Mango</a></h5>
-
-                        
-
-                        <div class="input-step">
-                            <button type="button" class="minus">–</button>
-                            <input type="number" class="product-quantity" value="1" min="0" max="100">
-                            <button type="button" class="plus">+</button>
-                        </div>
-                    </div>
-                    <div class="col-sm-auto">
-                        <div class="text-lg-end">
-                            <p class="text-muted mb-1">Valor:</p>
-                            <h5 class="fs-14">$<span class="product-price">3.000</span></h5>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- card body -->
-            <div class="card-footer">
-                <div class="row align-items-center gy-3">
-                    <div class="col-sm">
-                        <div class="d-flex flex-wrap my-n1">
-                            <div>
-                                <a href="#" class="d-block text-body p-1 px-2" data-bs-toggle="modal" data-bs-target="#EliminarItemModal"><i class="ri-delete-bin-fill text-muted align-bottom me-1"></i> Eliminar</a>
-                            </div>
-                            
-                        </div>
-                    </div>
-                    <div class="col-sm-auto">
-                        <div class="d-flex align-items-center gap-2 text-muted">
-                            <div>Total :</div>
-                            <h5 class="fs-14 mb-0">$<span class="product-line-price">3.000</span></h5>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- end card footer -->
-        </div>
-        <!-- end card -->
-
-
-        <div class="text-end mb-4">
-            <a href="#" class="btn btn-success btn-label right ms-auto"><i class="ri-arrow-right-line label-icon align-bottom fs-16 ms-2"></i> Ir a pagar</a>
-        </div>
+        }
+        else
+        {
+            <p class="text-muted">Tu carrito está vacío.</p>
+        }
     </div>
-    <!-- end col -->
 
     <div class="col-xl-4">
         <div class="sticky-side-div">
@@ -202,36 +122,137 @@
                             <tbody>
                                 <tr>
                                     <td>Sub Total :</td>
-                                    <td class="text-end" id="cart-subtotal">$ 11.000</td>
+                                    <td class="text-end" id="cart-subtotal">
+                                        $@_productos?.Sum(p => p.CostoUnitario ?? 0).ToString("N0")
+                                    </td>
                                 </tr>
 
                                 <tr>
                                     <td>IVA :</td>
-                                    <td class="text-end" id="cart-shipping">$ 10.000</td>
+                                    <td class="text-end" id="cart-shipping">$ 0</td> <!-- Puedes calcular IVA aquí si es necesario -->
                                 </tr>
                                 <tr class="table-active">
                                     <th>Total (COP) :</th>
                                     <td class="text-end">
                                         <span class="fw-semibold" id="cart-total">
-                                            $21.000
+                                            $@_productos?.Sum(p => p.CostoUnitario ?? 0).ToString("N0")
                                         </span>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <!-- end table-responsive -->
                 </div>
             </div>
-
-
         </div>
-        <!-- end stickey -->
-
     </div>
 </div>
-<!-- end row -->
+</body>
+<script>
+    function actualizarTotales() {
+        let totalCarrito = 0;
+        const formatter = new Intl.NumberFormat('es-CO');
+
+        document.querySelectorAll('.card.product').forEach(card => {
+            const input = card.querySelector('.product-quantity');
+            const cantidad = parseInt(input.value) || 0;
+            const precioUnitario = parseFloat(input.dataset.precio) || 0;
+
+            const totalLinea = cantidad * precioUnitario;
+            totalCarrito += totalLinea;
+
+            const spanLinea = card.querySelector('.product-line-price');
+            if (spanLinea) {
+                spanLinea.textContent = formatter.format(totalLinea);
+            }
+        });
+
+        const iva = totalCarrito * 0.19;
+        const totalConIva = totalCarrito + iva;
+
+        const subtotal = document.getElementById('cart-subtotal');
+        const shipping = document.getElementById('cart-shipping');
+        const total = document.getElementById('cart-total');
+
+        if (subtotal) subtotal.textContent = '$' + formatter.format(totalCarrito);
+        if (shipping) shipping.textContent = '$' + formatter.format(iva);
+        if (total) total.textContent = '$' + formatter.format(totalConIva);
+    }
+
+    function inicializarControlesCarrito() {
+        document.querySelectorAll('.input-step').forEach(step => {
+            const input = step.querySelector('.product-quantity');
+            const minus = step.querySelector('.minus');
+            const plus = step.querySelector('.plus');
+
+            if (!input || !minus || !plus) return;
+
+            minus.addEventListener('click', () => {
+                let val = parseInt(input.value) || 0;
+                val = Math.max(val - 1, 0);
+                input.value = val;
+                actualizarTotales();
+            });
+
+            plus.addEventListener('click', () => {
+                let val = parseInt(input.value) || 0;
+                const max = parseInt(input.getAttribute('max')) || 999;
+                val = Math.min(val + 1, max);
+                input.value = val;
+                actualizarTotales();
+            });
+
+            input.addEventListener('input', actualizarTotales);
+        });
+
+        actualizarTotales();
+    }
+
+    window.addEventListener('load', inicializarControlesCarrito);
+</script>
+
+
 
 @code {
+    private bool _isLoading = true;
+    private IEnumerable<Producto> _productos;
+    private IEnumerable<Usuario> _mercados;
+    private ParametroGeneral _categorias;
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (firstRender)
+            {
+                await LoadData();
+            }
+        }
+        catch (Exception exe)
+        {
+            _logger.LogError(exe, "Error al consultar usuarios");
+            await _jsRuntime.NotiflixNotifyAlert("Error interno del servidor", NotiflixMessageType.failure);
+        }
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        await Task.Yield();
+
+        var tCategorias = _parametroGeneralService.ConsultarParametroGeneralById(2);
+        var tMercados = _userService.GetUsuarios();
+        var tProductos = _gaiaCaporalService.GetProductos();
+
+        await Task.WhenAll(tCategorias, tMercados, tProductos);
+
+        _categorias = await tCategorias;
+        _productos = (await tProductos).OrderByDescending(u => u.FechaAdicion);
+        _mercados = await tMercados;
+
+        _isLoading = false;
+        StateHasChanged();
+    }
 }

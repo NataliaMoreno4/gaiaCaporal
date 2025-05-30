@@ -793,6 +793,10 @@ namespace PlantillaBlazor.Persistence.Migrations
                     b.Property<DateTime?>("FechaUltimaActualizacion")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("FotoUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<long>("IdCategoria")
                         .HasColumnType("bigint");
 
@@ -811,6 +815,9 @@ namespace PlantillaBlazor.Persistence.Migrations
                     b.Property<string>("NombreProducto")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StockDisponible")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -1434,7 +1441,7 @@ namespace PlantillaBlazor.Persistence.Migrations
                             Apellidos = "Administrador",
                             Celular = "3174575592",
                             Clave = "B9A465912169BEF97138C76EFDFD5BB34FDC5FA58855AC187817AE07E80ABE5E-5929B1B6239B2767DDEDDABC98823ADF",
-                            Email = "leonardo.arias@excellentiam.co",
+                            Email = "natmorenos42@gmail.com",
                             FechaAdicion = new DateTime(2024, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IdRol = 1L,
                             IsActive = true,

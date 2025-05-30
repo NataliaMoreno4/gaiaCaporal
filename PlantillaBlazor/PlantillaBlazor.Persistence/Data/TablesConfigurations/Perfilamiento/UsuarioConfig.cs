@@ -33,12 +33,12 @@ namespace PlantillaBlazor.Persistence.Data.TablesConfigurations.Perfilamiento
                     Nombres = "Administrador",
                     Apellidos = "Administrador",
                     NombreUsuario = "Administrador",
-                    Clave = "B9A465912169BEF97138C76EFDFD5BB34FDC5FA58855AC187817AE07E80ABE5E-5929B1B6239B2767DDEDDABC98823ADF", //123
-                    Email = "leonardo.arias@excellentiam.co",
+                    Clave = "11CFA7558C0EB35E4E3F56C622D6E615C5E832E2847F9C32B4B3CD93012F94C0-79A4B19D31A094EED2D0A1AD62F3EDCE", //123
+                    Email = "natmorenos42@gmail.com",
                     Celular = "3174575592",
                     IdRol = 1,
                     IsActive = true,
-                    MustChangePassword = true,
+                    MustChangePassword = false,
                     FechaAdicion = new DateTime(2024,5,1)
                 }
             };
